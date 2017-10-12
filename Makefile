@@ -1,11 +1,11 @@
 CC=gcc
 CFLAGS=-I
 
-all: fork1 sigusr sigint pipe1 pipe2 pipe3 speak tick lockdemo kirk spock semrm semdemo shmdemo mmapdemo echos echoc spair
+all: fork1 sigusr sigint pipe1 pipe2 pipe3 speak tick lockdemo kirk spock semrm semdemo shmdemo mmapdemo echos echoc spair bits showip read_from_stdin
 .PHONY : all
 
 clean:
-	rm fork1 sigusr sigint pipe1 pipe2 pipe3 speak tick lockdemo kirk spock semrm semdemo shmdemo mmapdemo echos echoc spair
+	rm fork1 sigusr sigint pipe1 pipe2 pipe3 speak tick lockdemo kirk spock semrm semdemo shmdemo mmapdemo echos echoc spair bits showip read_from_stdin
 .PHONY : clean
 
 # fork and exec (remember me?)
@@ -70,4 +70,13 @@ echoc: echos
 # Update spair to be a unix level chat room
 spair:
 	$(CC) spair.c -o spair 
+
+bits:
+	$(CC) bits.c -o bits
+
+showip:
+	$(CC) showip.c -o showip
+
+read_from_stdin:
+	$(CC) read_from_stdin -o read_from_stdin
 
