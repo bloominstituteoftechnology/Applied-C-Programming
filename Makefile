@@ -1,5 +1,4 @@
 CC=gcc
-CFLAGS=-I
 
 all: fork1 sigusr sigint pipe1 pipe2 pipe3 speak tick lockdemo kirk spock semrm semdemo shmdemo mmapdemo echos echoc spair bits showip read_from_stdin
 .PHONY : all
@@ -78,5 +77,5 @@ showip:
 	$(CC) showip.c -o showip
 
 read_from_stdin:
-	$(CC) read_from_stdin -o read_from_stdin
+	$(CC) read_from_stdin.c -o read_from_stdin
 
