@@ -43,7 +43,7 @@
      // custom LINUX code
     #elseif __WIN__
      // custom WINDOWS code
-    #endif 
+    #endif
 
     or:
     #ifdef _SPECIAL_LIBRARY_FLAG_
@@ -64,7 +64,7 @@
     * faults - SIGSEGV, SIG, et
     Delivered to your app as signals and can be overridden
     Extra credit - use the included sigusr.c or sigint.c code
-    to prevent your application from crashing when it accesses 
+    to prevent your application from crashing when it accesses
     illegal memory
 
     * file scope
@@ -86,7 +86,7 @@
     * compilation arguments
     * compiler optimizations
     * make and CMake
-see [Building External Libraries](#ImageMagick)
+see [Building External Libraries](#imagemagick)
 
     * bit shifting >> <<
     * binary operators &, |, ~
@@ -156,6 +156,16 @@ Now you know how to execute a process and `fork` it, or to `exec` an all new pro
 This serves a multitude of purposes: You can create library processes (of which the operating system is built from) that can be used by other applications to accomplish specific tasks. You can link two processes together in order to combine their results intelligently. Most importantly, you can take advantage of the automatic process and core scheduling routines of the operating system to gain true simultaneous operation, by executing different processes on separate cores.
 
 This is real asynchronous execution, commonly called threading, and it is fraught with dangers.
+
+# Mini sprint
+
+Run
+
+```
+    make
+```
+
+in this repository and play with all of the compiled c programs. They are explained in part below.
 
 # Synchronization
 
@@ -246,7 +256,7 @@ Your objective is to refactor the following simple UNIX net sockets server `serv
 The HTTP protocol is a simple text protocol that is parsed line by line by C servers around the world. It is much easier to write an HTTP server using Node.js, and much more informative to create one from scratch with C. For our benefit we can use the example socket server code to protect us from the primarily hassle of writing a simple C server. Real HTTP servers need to be fault tolerant (able to return an ISE 500 when something goes wrong), multi threaded, and efficient.
 
 A simple HTTP request to / works as follows at the protocol level:
-    
+
 ```
     GET / HTTP/1.1
     Host: localhost:7080
@@ -336,8 +346,8 @@ Curl generates the simple request above when trying to save "my message". Your a
 Parameters
 
 ```
-    Server/:::student name::: - stored on your local environment (ENV) as 
-    STUDENT_NAME and read at run time by your server with the `getenv` 
+    Server/:::student name::: - stored on your local environment (ENV) as
+    STUDENT_NAME and read at run time by your server with the `getenv`
     function call.
 
     Date - calculated at the time of request using the `time()` function and the
