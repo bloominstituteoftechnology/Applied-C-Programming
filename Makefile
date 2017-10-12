@@ -1,10 +1,10 @@
 CC=gcc
 
-all: fork1 sigusr sigint pipe1 pipe2 pipe3 speak tick lockdemo kirk spock semrm semdemo shmdemo mmapdemo echos echoc spair bits showip read_from_stdin
+all: fork1 sigusr sigint pipe1 pipe2 pipe3 speak tick lockdemo kirk spock semrm semdemo shmdemo mmapdemo echos echoc spair bits showip read_from_stdin pointer_crazy
 .PHONY : all
 
 clean:
-	rm fork1 sigusr sigint pipe1 pipe2 pipe3 speak tick lockdemo kirk spock semrm semdemo shmdemo mmapdemo echos echoc spair bits showip read_from_stdin
+	rm fork1 sigusr sigint pipe1 pipe2 pipe3 speak tick lockdemo kirk spock semrm semdemo shmdemo mmapdemo echos echoc spair bits showip read_from_stdin pointer_crazy
 .PHONY : clean
 
 # fork and exec (remember me?)
@@ -28,7 +28,7 @@ pipe3:
 	$(CC) pipe3.c -o pipe3
 
 # Two way pipes - named pipes
-speak: 
+speak:
 	$(CC) speak.c -o speak
 
 tick: speak
@@ -62,13 +62,13 @@ mmapdemo:
 # Unix Sockets
 # Echo server
 echos:
-	$(CC) echos.c -o echos 
+	$(CC) echos.c -o echos
 echoc: echos
 	$(CC) echoc.c -o echoc
 # two directional communication
 # Update spair to be a unix level chat room
 spair:
-	$(CC) spair.c -o spair 
+	$(CC) spair.c -o spair
 
 bits:
 	$(CC) bits.c -o bits
@@ -79,3 +79,5 @@ showip:
 read_from_stdin:
 	$(CC) read_from_stdin.c -o read_from_stdin
 
+pointer_crazy:
+	$(CC) pointer_crazy.c -o pointer_crazy
