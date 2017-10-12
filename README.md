@@ -262,7 +262,7 @@ A simple HTTP request to / works as follows at the protocol level:
 
 The top portion is called the header, and the lower portion is the body. They are always separated by a single line of whitespace. A GET request can contain a body, but generally does not, and is not required to in this assignment. Chrome sends complicated and long headers in a basic request, which you are not required to support.
 
-[!Chrome doesn't like it](https://www.dropbox.com/s/ijw44ez3l9h1ioa/Screenshot%202017-10-12%2011.14.26.png?raw=1)
+![Chrome doesn't like it](https://www.dropbox.com/s/ijw44ez3l9h1ioa/Screenshot%202017-10-12%2011.14.26.png?raw=1)
 
 A simple HTTP POST looks like this:
 
