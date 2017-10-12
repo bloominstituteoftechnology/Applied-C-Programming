@@ -86,7 +86,7 @@
     * compilation arguments
     * compiler optimizations
     * make and CMake
-see [Building External Libraries](#imagemagick)
+see [Building External Libraries](#building-libraries)
 
     * bit shifting >> <<
     * binary operators &, |, ~
