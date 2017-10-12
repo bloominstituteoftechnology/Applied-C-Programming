@@ -264,6 +264,8 @@ The top portion is called the header, and the lower portion is the body. They ar
 
 ![Chrome doesn't like it](https://www.dropbox.com/s/ijw44ez3l9h1ioa/Screenshot%202017-10-12%2011.14.26.png?raw=1)
 
+Your goal is to make Chrome happy when you return /, by including the proper headers and BODY.
+
 A simple HTTP POST looks like this:
 
     POST /info HTTP/1.1
