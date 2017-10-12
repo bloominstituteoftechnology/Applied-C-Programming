@@ -247,6 +247,7 @@ The HTTP protocol is a simple text protocol that is parsed line by line by C ser
 
 A simple HTTP request to / works as follows at the protocol level:
     
+```
     GET / HTTP/1.1
     Host: localhost:7080
     Connection: keep-alive
@@ -257,6 +258,7 @@ A simple HTTP request to / works as follows at the protocol level:
     Accept-Encoding: gzip, deflate, br
     Accept-Language: en-US,en;q=0.8
     Cookie: _ga=GA1.1.1267589271.1490801020; intercom-id-vaspqzqc=b356e5a1-3e1a-4d0d-9efa-0e07e98df7c4; olfsk=olfsk5267054354755929; hblid=jH6UDoDmWj5Pvq6g3m39N0V8REA6rT2B
+```
 
 ^^^ Generated via Chrome ^^^
 
@@ -268,6 +270,7 @@ Your goal is to make Chrome happy when you return /, by including the proper hea
 
 A simple HTTP POST looks like this:
 
+```
     POST /info HTTP/1.1
     User-Agent: curl/7.27.0
     Host: localhost:7080
@@ -276,6 +279,7 @@ A simple HTTP POST looks like this:
     Content-Type: application/x-www-form-urlencoded
 
     my message
+```
 
 
 Curl generates the simple request above when trying to save "my message". Your app must handle this request, and save the result.
@@ -288,29 +292,36 @@ Curl generates the simple request above when trying to save "my message". Your a
 
 2. Modify this file to become a simple HTTP server. It should accept `/` and `/info` requests.
 
-2.1 Your server must support the following requests:
+  * Your server must support the following requests:
 
+```
     GET / HTTP/1.0
     GET /info HTTP/1.0
     POST /info HTTP/1.0
+```
 
-2.2 Your server must support the following headers:
+  * Your server must support the following headers:
 
+```
     Content-Length:
     Host:
     User-Agent:
+```
 
 3. Your server response must match the HTTP response header protocol:
 
+```
     HTTP/1.0 200 OK
     Date: xxxx (formatted time or Unix time)
     Server: Name of Student
     Content-Length: yy
     Connection: close
     Content-Type: text/html
+```
 
-3.1 Your server must return the following results:
+  * Your server must return the following results:
 
+```
     GET /
     <html><head></head><body>Welcome to :::student name:::</body></html>
 
@@ -320,17 +331,23 @@ Curl generates the simple request above when trying to save "my message". Your a
     POST /info
 
     ::: any message less than 1024 bytes :::
+```
 
 Parameters
 
+```
     Server/:::student name::: - stored on your local environment (ENV) as 
     STUDENT_NAME and read at run time by your server with the `getenv` 
     function call.
+
     Date - calculated at the time of request using the `time()` function and the
     `time_t` structure loaded from `#include <time.h>`
+
     Content-Length - The length of the BODY of the message that is sent.
+
     message - Either return "undefined" if no message has been sent, or return
     the message that was uploaded via the POST /info request previously.
+```
 
 # Resources
 
