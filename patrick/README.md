@@ -157,6 +157,16 @@ This serves a multitude of purposes: You can create library processes (of which 
 
 This is real asynchronous execution, commonly called threading, and it is fraught with dangers.
 
+# Mini sprint
+
+Run
+
+```
+    make
+```
+
+in this repository and play with all of the compiled c programs. They are explained in part below.
+
 # Synchronization
 
 When two processes attempt to use the same piece of data or communicate at the same time period, there is a high probability that the operating system will interrupt one mid-stride, messing up its expected inputs or outputs.
