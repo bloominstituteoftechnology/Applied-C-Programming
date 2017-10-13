@@ -5,16 +5,16 @@
 /* C libraries <> */
 #include <stdio.h>      // core input and output
 #include <stdlib.h>     // numeric conversion functions, pseudo-random numbers generation functions, memory allocation, process control functions
-#include <unistd.h>     //
+#include <unistd.h>     // close() http://pubs.opengroup.org/onlinepubs/7908799/xsh/unistd.h.html
 #include <errno.h>      // For testing error codes reported by library functions.
 #include <string.h>     // string handling functions
-#include <sys/types.h>  //
-#include <sys/socket.h> //
-#include <netinet/in.h> //
-#include <netdb.h>      //
-#include <arpa/inet.h>  //
-#include <sys/wait.h>   //
-#include <signal.h>     // signal handling functions.
+#include <sys/types.h>  // http://pubs.opengroup.org/onlinepubs/7908799/xsh/systypes.h.html
+#include <sys/socket.h> // socklen_t http://pubs.opengroup.org/onlinepubs/7908799/xns/syssocket.h.html
+#include <netinet/in.h> // http://pubs.opengroup.org/onlinepubs/7908799/xns/netinetin.h.html
+#include <netdb.h>      // http://pubs.opengroup.org/onlinepubs/7908799/xns/netdb.h.html
+#include <arpa/inet.h>  // makes stuff available from netinet/in.h http://pubs.opengroup.org/onlinepubs/7908799/xns/arpainet.h.html
+#include <sys/wait.h>   // defines symbolic constants for use with waitpid(): http://pubs.opengroup.org/onlinepubs/7908799/xsh/syswait.h.html
+#include <signal.h>     // signal handling functions, expanded types: http://pubs.opengroup.org/onlinepubs/7908799/xsh/signal.h.html
 
 /* Macros */
 #define PORT "7080"  // the port users will be connecting to
