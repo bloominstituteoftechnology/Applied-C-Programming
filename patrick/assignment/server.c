@@ -56,7 +56,11 @@ void *get_in_addr(struct sockaddr *sa)
 }
 
 
-// Whoa.
+/* Whoa. As I understand, the code prior to the while loop
+ * is setting up the server components
+ * and once the while loop engages, that's where the server is listening
+ */
+
 int main(void)
 {
   int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
