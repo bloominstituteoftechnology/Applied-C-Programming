@@ -2,21 +2,21 @@
 ** server.c -- a stream socket server demo
 */
 
-// C libraries <>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <sys/wait.h>
-#include <signal.h>
+/* C libraries <> */
+#include <stdio.h>      // core input and output
+#include <stdlib.h>     // numeric conversion functions, pseudo-random numbers generation functions, memory allocation, process control functions
+#include <unistd.h>     //
+#include <errno.h>      // For testing error codes reported by library functions.
+#include <string.h>     // string handling functions
+#include <sys/types.h>  //
+#include <sys/socket.h> //
+#include <netinet/in.h> //
+#include <netdb.h>      //
+#include <arpa/inet.h>  //
+#include <sys/wait.h>   //
+#include <signal.h>     // signal handling functions.
 
-// Macros
+/* Macros */
 #define PORT "7080"  // the port users will be connecting to
 
 #define GET_ROOT "GET / HTTP/1.0"
@@ -30,9 +30,10 @@
 
 #define BACKLOG 10   // how many pending connections queue will hold
 
-// https://www.gnu.org/software/libc/manual/html_node/Process-Completion.html
-// WNOHANG - This flag specifies that waitpid should return immediately instead of waiting, if there is no child process ready to be noticed.
-// deals with signals from child processes?
+/* https://www.gnu.org/software/libc/manual/html_node/Process-Completion.html
+ * WNOHANG - This flag specifies that waitpid should return immediately instead of waiting, if there is no child process ready to be noticed.
+ * deals with signals from child processes?
+ */
 void sigchld_handler(int s)
 {
   // waitpid() might overwrite errno, so we save and restore it:
