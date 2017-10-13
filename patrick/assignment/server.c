@@ -149,6 +149,23 @@ int main(void)
       printf("buffer: %s\n", buffer);
 
       // LS: loop above until \n\n is sent, signaling the end of an HTTP request
+
+      int option;
+
+      char search[5] = {'P', 'O', 'S', 'T', '\0'};
+      if (strstr(buffer, search)) {
+        option = 1;
+        printf("\nFound\n");
+        // puts("\nFound");
+      }
+
+      char snearch[4] = {'G', 'E', 'T', '\0'};
+      if (strstr(buffer, snearch)) {
+        option = 2;
+        // printf("\nFound Get\n");
+        puts("\nFound Get");
+      }
+
       /* substring - looks for a string within a string
         or char8 within a char*
         split a string
@@ -158,11 +175,16 @@ int main(void)
         "split" baed on \n
 
         measure the data, parse it out, to discern /GET or /info GET or POST
+        https://linux.die.net/man/3/strstr
       */
       // LS: parse the input and determine what result to send
       close(sockfd); // child doesn't need the listener
+
+      // if dskjvnlkdjfnvlkwjnfdlvkjnwdflkjvnslkdfjnvlwdfv;
+
       // LS: Send the correct response in JSON format
-      if (send(new_fd, "Hello, world!", 13, 0) == -1)
+      // if (send(new_fd, "Hello, world!", 13, 0) == -1)
+      if (send(new_fd, "HTTP/1.0 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
         perror("send");
       close(new_fd);
       exit(0);
