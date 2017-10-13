@@ -160,13 +160,27 @@ int main(void)
       int read_result = read(new_fd, &buffer, READ_BUFFER_SIZE); // number of bytes actually read and placed in buffer (https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.2.0/com.ibm.zos.v2r2.bpxbd00/rtrea.htm)
       printf("read_result: %d\n", read_result);
       printf("buffer: %s\n", buffer);
-
+// **********************************************************************************************
+// The part I am changing - for reading
+// **********************************************************************************************
+      if (buffer[0] == 'G')
+      {
+        printf("This is a GET");
+      }
+      printf("buffer[0]: %c\n", buffer[0]);
+// **********************************************************************************************
       // LS: loop above until \n\n is sent, signaling the end of an HTTP request
 
       // LS: parse the input and determine what result to send
       close(sockfd); // child doesn't need the listener
       // LS: Send the correct response in JSON format
-      if (send(new_fd, "Hello, world!", 13, 0) == -1)
+      // use the send function to send the response
+      // if (send(new_fd, "Hello, world!", 13, 0) == -1)
+// **********************************************************************************************
+// The part I am changing - for sending 
+// **********************************************************************************************
+      if (send(new_fd, "HTTP/1.0 200 OK\n\n<html><\\html>", 32, 0) == -1) // thanks Patrick!  :)
+// **********************************************************************************************
         perror("send");
       close(new_fd);
       exit(0);
