@@ -180,7 +180,7 @@ int main(void)
       // LS: parse the input and determine what result to send
       close(sockfd); // child doesn't need the listener
 
-      // if dskjvnlkdjfnvlkwjnfdlvkjnwdflkjvnslkdfjnvlwdfv;
+      // if option = 1; or SWITCH
 
       // LS: Send the correct response in JSON format
       // if (send(new_fd, "Hello, world!", 13, 0) == -1)
