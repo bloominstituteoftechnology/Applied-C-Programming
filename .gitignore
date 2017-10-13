@@ -1,0 +1,7 @@
+# Ignore vim
+*~
+*.swp
+*.swo
+
+# Ignore macOS
+.DS_Store
