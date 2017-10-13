@@ -2,6 +2,7 @@
 ** server.c -- a stream socket server demo
 */
 
+// C libraries <>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -15,6 +16,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 
+// Macros
 #define PORT "7080"  // the port users will be connecting to
 
 #define GET_ROOT "GET / HTTP/1.0"
@@ -28,6 +30,9 @@
 
 #define BACKLOG 10   // how many pending connections queue will hold
 
+// https://www.gnu.org/software/libc/manual/html_node/Process-Completion.html
+// WNOHANG - This flag specifies that waitpid should return immediately instead of waiting, if there is no child process ready to be noticed.
+// deals with signals from child processes?
 void sigchld_handler(int s)
 {
   // waitpid() might overwrite errno, so we save and restore it:
@@ -38,7 +43,7 @@ void sigchld_handler(int s)
   errno = saved_errno;
 }
 
-
+// I'm happy with this explanation, discerns IPv4 and 6
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -49,6 +54,8 @@ void *get_in_addr(struct sockaddr *sa)
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+
+// Whoa.
 int main(void)
 {
   int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
