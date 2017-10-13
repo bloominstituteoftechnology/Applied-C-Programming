@@ -28,6 +28,8 @@
 
 #define BACKLOG 10   // how many pending connections queue will hold
 
+//used for retrieving and saving error conditions it seems
+//some actions of child process
 void sigchld_handler(int s)
 {
   // waitpid() might overwrite errno, so we save and restore it:
@@ -38,12 +40,12 @@ void sigchld_handler(int s)
   errno = saved_errno;
 }
 
-
+//for getting to some address and AF_INT for connection maybe
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
-  if (sa->sa_family == AF_INET) {
-    return &(((struct sockaddr_in*)sa)->sin_addr);
+  if (sa->sa_family == AF_INET) {//
+    return &(((struct sockaddr_in*)sa)->sin_addr);//seems like socket connection to some address 
   }
 
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
@@ -138,13 +140,27 @@ int main(void)
 
       // LS: loop above until \n\n is sent, signaling the end of an HTTP request
 
+      int option;
+
+      char search[5] = {'P', 'O', 'S', 'T', '\0'};
+      if (strstr(buffer, search)) {
+        option = 1;
+        printf("\nFound\n");
+      }
+
+      char ssearch[5] = {'G', 'E', 'T', '\0'};
+      if (strstr(buffer, ssearch)) {
+        option = 2;
+        printf("\nFound\n");
+      }
       // LS: parse the input and determine what result to send
       close(sockfd); // child doesn't need the listener
       // LS: Send the correct response in JSON format
-      if (send(new_fd, "Hello, world!", 13, 0) == -1)
+      if (send(new_fd, "HTTP/1.0 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
+      // if (send(new_fd, "Hello, world!", 13, 0) == -1)
         perror("send");
-      close(new_fd);
-      exit(0);
+        close(new_fd);
+        exit(0);
     }
     close(new_fd);  // parent doesn't need this
   }
