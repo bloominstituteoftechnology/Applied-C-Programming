@@ -149,7 +149,16 @@ int main(void)
       printf("buffer: %s\n", buffer);
 
       // LS: loop above until \n\n is sent, signaling the end of an HTTP request
+      /* substring - looks for a string within a string
+        or char8 within a char*
+        split a string
+        HTTP protocol
+        deserialize the string from and putting it in a serial fomat
+        based on what is sent in, determine the kind of response (GET, POST /info, GET /info)
+        "split" baed on \n
 
+        measure the data, parse it out, to discern /GET or /info GET or POST
+      */
       // LS: parse the input and determine what result to send
       close(sockfd); // child doesn't need the listener
       // LS: Send the correct response in JSON format
