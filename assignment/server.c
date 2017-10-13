@@ -154,9 +154,10 @@ int main(void)
     if (!fork()) { // this is the child process
       // LS: read from client input
       // in the child process, reads the incoming info
+      // read_result is the first integer of the buffer string
       const int READ_BUFFER_SIZE = 1024;
       char buffer[READ_BUFFER_SIZE]; // set up array for a string
-      int read_result = read(new_fd, &buffer, READ_BUFFER_SIZE);
+      int read_result = read(new_fd, &buffer, READ_BUFFER_SIZE); // number of bytes actually read and placed in buffer (https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.2.0/com.ibm.zos.v2r2.bpxbd00/rtrea.htm)
       printf("read_result: %d\n", read_result);
       printf("buffer: %s\n", buffer);
 
