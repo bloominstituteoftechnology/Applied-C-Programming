@@ -17,9 +17,9 @@
 
 #define PORT "7080"  // the port users will be connecting to
 
-#define GET_ROOT "GET / HTTP/1.0"
-#define GET_INFO "GET /info HTTP/1.0"
-#define POST_INFO "POST /info HTTP/1.0"
+#define GET_ROOT "GET / HTTP/1.1"
+#define GET_INFO "GET /info HTTP/1.1"
+#define POST_INFO "POST /info HTTP/1.1"
 #define DATE "Date:"
 #define SERVER "Server:"
 #define CONTENT_LENGTH "Content-Length:"
@@ -27,6 +27,9 @@
 #define CONTENT_TYPE "Content-Type: text/html"
 
 #define BACKLOG 10   // how many pending connections queue will hold
+
+#define BYTE sizeof(char)
+#define REQUEST_END "\r\n\r\n"
 
 void sigchld_handler(int s)
 {
@@ -47,6 +50,18 @@ void *get_in_addr(struct sockaddr *sa)
   }
 
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+char* get_request(char* buffer, int buffer_size, int max_buffer_size) {
+  char* index = memmem(buffer, buffer_size, REQUEST_END, 4);
+  return index; // NULL if REQUEST_END not found
+}
+
+int get_resource(char* buffer, char* buffer_end) {
+  if (memmem(buffer, buffer_end - buffer, GET_ROOT, sizeof(GET_ROOT) - 1)) return 0;
+  if (memmem(buffer, buffer_end - buffer, GET_INFO, sizeof(GET_INFO) - 1)) return 1;
+  if (memmem(buffer, buffer_end - buffer, POST_INFO, sizeof(POST_INFO) - 1)) return 2;
+  return -1;
 }
 
 int main(void)
@@ -136,9 +151,33 @@ int main(void)
       printf("read_result: %d\n", read_result);
       printf("buffer: %s\n", buffer);
 
+      char* request = get_request(buffer, read_result, READ_BUFFER_SIZE);
+      if (!request) {
+        fprintf(stderr, "ERROR: failed to find a REQUEST_END\n");
+        exit(1);
+      }
+      printf("got end at %p\n", request);
+
       // LS: loop above until \n\n is sent, signaling the end of an HTTP request
 
       // LS: parse the input and determine what result to send
+
+      switch (get_resource(buffer, request)) {
+      case 0:
+        fprintf(stderr, "found a proper get request\n");
+        break;
+      case 1:
+        fprintf(stderr, "found a proper get info request\n");
+        break;
+      case 2:
+        fprintf(stderr, "found a propert post info request\n");
+        break;
+      default:
+        fprintf(stderr, "ERROR: failed to find a proper get request\n");
+        exit(1);
+        break;
+      }
+
       close(sockfd); // child doesn't need the listener
       // LS: Send the correct response in JSON format
       if (send(new_fd, "Hello, world!", 13, 0) == -1)
