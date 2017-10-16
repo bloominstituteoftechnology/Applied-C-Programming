@@ -151,23 +151,6 @@ int main(void)
       printf("buffer: %s\n", buffer);
 
       // LS: loop above until \n\n is sent, signaling the end of an HTTP request
-
-      int option;
-      char searchPOST[5] = {'P', 'O', 'S', 'T', '\0'};
-      if (strstr(buffer, searchPOST)) {
-      // if (strstr(buffer, POST_INFO)) {
-        option = 1;
-        puts("Found POST");
-      }
-      if (strstr(buffer, GET_INFO)) {
-        option = 2;
-        puts("Found GET");
-      }
-      if (strstr(buffer, GET_ROOT)) {
-        option = 2;
-        puts("Found GET");
-      }
-
       /* substring - looks for a string within a string
         or char8 within a char*
         split a string
@@ -179,6 +162,27 @@ int main(void)
         measure the data, parse it out, to discern /GET or /info GET or POST
         https://linux.die.net/man/3/strstr
       */
+      int option;
+      if (strstr(buffer, GET_ROOT)) {
+        option = 1;
+        puts("Found GET /");
+      }
+      if (strstr(buffer, GET_INFO)) {
+        option = 2;
+        puts("Found GET /info");
+      }
+      char searchPOST[5] = {'P', 'O', 'S', 'T', '\0'};
+      if (strstr(buffer, searchPOST)) {
+      // if (strstr(buffer, POST_INFO)) {
+        option = 3;
+        puts("Found POST, what avout posting to /info???");
+        // puts("Found POST /info");
+      }
+      if (strstr(buffer, POST_INFO)) {
+        option = 3;
+        puts("Found POST /info");
+      }
+
       // LS: parse the input and determine what result to send
       close(sockfd); // child doesn't need the listener
 
