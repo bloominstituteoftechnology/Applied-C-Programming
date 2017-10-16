@@ -16,6 +16,8 @@
 #include <sys/wait.h>   // defines symbolic constants for use with waitpid(): http://pubs.opengroup.org/onlinepubs/7908799/xsh/syswait.h.html
 #include <signal.h>     // signal handling functions, expanded types: http://pubs.opengroup.org/onlinepubs/7908799/xsh/signal.h.html
 
+#include "index.h" // My shit.
+
 /* Macros */
 #define PORT "7080"  // the port users will be connecting to
 
@@ -151,19 +153,17 @@ int main(void)
       // LS: loop above until \n\n is sent, signaling the end of an HTTP request
 
       int option;
-
-      char search[5] = {'P', 'O', 'S', 'T', '\0'};
-      if (strstr(buffer, search)) {
+      char searchPOST[5] = {'P', 'O', 'S', 'T', '\0'};
+      if (strstr(buffer, searchPOST)) {
         option = 1;
-        printf("\nFound\n");
-        // puts("\nFound");
+        puts("Found POST");
       }
 
-      char snearch[4] = {'G', 'E', 'T', '\0'};
-      if (strstr(buffer, snearch)) {
+      char searchGET[4] = {'G', 'E', 'T', '\0'};
+      if (strstr(buffer, searchGET)) {
         option = 2;
-        // printf("\nFound Get\n");
-        puts("\nFound Get");
+        puts("Found GET");
+        printf("buffer: %s\n", buffer);
       }
 
       /* substring - looks for a string within a string
