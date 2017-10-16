@@ -170,6 +170,9 @@ int main(void)
       } else if (strstr(buffer, GET_ROOT)) {
         option = 1;
         puts("Found GET /\n");
+      } else if (strstr(buffer, "GET /favicon.ico HTTP/1.1")) {
+        puts("wOt?!?!");
+        option = 5;
       }
 
       /* POST */
@@ -188,11 +191,33 @@ int main(void)
       close(sockfd); // child doesn't need the listener
 
       // if option = 1; or SWITCH
-
+      switch(option)
+      case 1:
+        if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
+          perror("send");
+        break;
+      case 2:
+        if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
+          perror("send");
+        break;
+      case 3:
+        if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
+          perror("send");
+        break;
+      case 4:
+        if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
+          perror("send");
+        break;
+      case 5:
+        if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
+          perror("send");
+        break;
+      default:
+        break;
       // LS: Send the correct response in JSON format
       // if (send(new_fd, "Hello, world!", 13, 0) == -1)
-      if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
-        perror("send");
+      // if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
+      //   perror("send");
       close(new_fd);
       exit(0);
     }
