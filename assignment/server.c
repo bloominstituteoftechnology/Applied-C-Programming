@@ -187,23 +187,29 @@ int main(void)
       
       if (strstr(buffer, getInfo) && lastMessageLen == 0)
       {
-        len = snprintf(buff, 2048, "<html><head>HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text\html\n<head><body>{\"info\": {\"name\": \"Sarah\", \"url_request\": \"/info\", \"last_message\": \"undefined\"}}</body></html>",date, read_result);
+        len = snprintf(buff, 2048, "<html><head>HTTP/1.0 OK\nDate: %ld\nServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text/html\n<head><body>{\"info\": {\"name\": \"Sarah\", \"url_request\": \"/info\", \"last_message\": \"undefined\"}}</body></html>",date, read_result);
         printf("\nGet info, no previous message\n");
       }
       else if (strstr(buffer, getInfo) && lastMessageLen > 0)
       {
-        len = snprintf(buff, 2048, "HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text\html\n<html><head></head><body>{\"info\": {\"name\": \"Sarah\", \"url_request\": \"/info\", \"last_message\": \"%s\"}}</body></html>",date, read_result, lastMessage);
+        len = snprintf(buff, 2048, "HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text/html\n<html><head></head><body>{\"info\": {\"name\": \"Sarah\", \"url_request\": \"/info\", \"last_message\": \"%s\"}}</body></html>",date, read_result, lastMessage);
       }
       else if (strstr(buffer, getSlash))
       {
         len = snprintf(buff, 2048, "<html><head>HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text/html\n</head><body>Welcome To Sarah's Server</body></html>\n\n",date, read_result);
         printf("\nFound\n");
       }
-      // else if (strstr(buffer, postInfo))
-      // {
-      //   lastMessageLen = sprintf(lastMessage, // all the things in the message section);
-      //   len = snprintf(buff, 2048, "HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text\html\n<html><head></head><body>{"info": {"name": "Sarah", "url_request": "/info", "last_message": "%s"}}</body></html>",date, read_result, lastMessage);
-      // }
+      else if (strstr(buffer, postInfo))
+      {
+        // lastMessageLen = sprintf(lastMessage, // all the things in the message section);
+        char* point = strstr(buffer, "\r\n\r\n");
+        printf("\nFound the empty line%s\n", point);
+        char* message = malloc(READ_BUFFER_SIZE - read_result);
+        memcpy(message, point + 4, READ_BUFFER_SIZE - read_result);
+        // lastMessageLen = snprintf(lastMessage, read_result - point, buffer[point]);
+        len = snprintf(buff, 2048, "<html><head>HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text/html\n</head><body>{\"info\": {\"name\": \"Sarah\", \"url_request\": \"/info\", \"last_message\": \"%s\"}}</body></html>",date, read_result, message);
+        printf("this is the message: %s",message);
+      }
 
 // **********************************************************************************************
       // LS: loop above until \n\n is sent, signaling the end of an HTTP request
