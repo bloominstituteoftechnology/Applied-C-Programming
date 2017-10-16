@@ -1,6 +1,6 @@
 /*
 ** server.c -- a stream socket server demo
-** version 0.2_b
+** version 0.2_c
 */
 
 #include <stdio.h>
@@ -298,10 +298,13 @@ int main(void)
         sprintf(root, template, STUDENT);
         create_response(response, root);
         break;
+
       case 1: // GET /info
         fprintf(stderr, "found a proper get info request\n");
-        info = "";
+        char* info = malloc(1024);
+        
         break;
+
       case 2: // POST /info
         message = malloc(READ_BUFFER_SIZE - read_result);
         int length = get_message(message, buffer, request);
@@ -309,15 +312,22 @@ int main(void)
           fprintf(stderr, "ERROR: no message found in a POST request\n");
           exit(1);
         }
-        printf("MESSAGE: \n%s\n", message);
-        if ((fd = fopen(MSG_FILE, "a")) == NULL) {
+        if ((fd = fopen(MSG_FILE, "w")) == NULL) {
           fprintf(stderr, "ERROR opening file for appending");
           exit(1);
         }
+        if ((fprintf(fd, "%s\n", message) != length + 1)) {
+          fprintf(stderr, "ERROR writing message to file\n");
+          exit(1);
+        }
+        printf("POSTED: \n%s\n", message);
+        fclose(fd);
         break;
+
       case 3: // favicon
         fprintf(stderr, "received a request for a favicon; ignoring\n");
         break;
+
       default:
         fprintf(stderr, "ERROR: failed to find a proper get request\n");
         exit(1);
