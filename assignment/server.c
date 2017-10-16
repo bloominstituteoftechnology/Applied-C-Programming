@@ -1,5 +1,6 @@
 /*
 ** server.c -- a stream socket server demo
+** version 0.3_b
 */
 
 #include <stdio.h>
@@ -14,19 +15,46 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <sys/time.h>
 
 #define PORT "7080"  // the port users will be connecting to
 
-#define GET_ROOT "GET / HTTP/1.0"
-#define GET_INFO "GET /info HTTP/1.0"
-#define POST_INFO "POST /info HTTP/1.0"
-#define DATE "Date:"
-#define SERVER "Server:"
-#define CONTENT_LENGTH "Content-Length:"
-#define CONNECTION "Connection: close"
-#define CONTENT_TYPE "Content-Type: text/html"
+// some HTTP requests
+#define GET_ROOT  "GET / HTTP/1.1"
+#define GET_INFO  "GET /info HTTP/1.1"
+#define POST_INFO "POST /info HTTP/1.1"
+#define GET_FAVICON "GET /favicon.ico HTTP/1.1"
+
+// HTTP response components
+#define STATUS_OK      "200 OK"
+#define RESPONSE_OK    "HTTP/1.1 "STATUS_OK"\r\n"
+#define DATE           "Date: "
+#define SERVER         "Server: "
+#define CONTENT_LENGTH "Content-Length: %d\r\n"
+#define CONNECTION     "Connection: close\r\n"
+#define TEXT_HTML      "text/html"
+#define APPLICATION_JSON "application/json"
+#define CONTENT_TYPE_TEXT   "Content-Type: "TEXT_HTML"\r\n"
+#define CONTENT_TYPE_JSON   "Content-Type: "APPLICATION_JSON"\r\n"
+#define CONTENT_TYPE(type)  type==0 ? CONTENT_TYPE_TEXT : CONTENT_TYPE_JSON
+#define UNDEFINED      "undefined"
+
+#define READ_BUFFER_SIZE  1024
+#define MAX_RESPONSE_SIZE 1024
+#define MAX_STUDENT_LEN 24
 
 #define BACKLOG 10   // how many pending connections queue will hold
+
+#define BYTE sizeof(char)
+#define CRLF "\r\n"
+#define REQUEST_END "\r\n\r\n"
+
+char* STUDENT; // to be filled-in by environment variable STUDENT_NAME
+#define MSG_FILE "last_message.txt"
+
+
+
+
 
 void sigchld_handler(int s)
 {
@@ -38,7 +66,6 @@ void sigchld_handler(int s)
   errno = saved_errno;
 }
 
-
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -47,6 +74,114 @@ void *get_in_addr(struct sockaddr *sa)
   }
 
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+
+
+
+
+/*
+  Finds a blank line in the request; returns pointer to the start of the message body
+   or NULL if no blank line could be found
+ */
+char* get_request(char* buffer, int buffer_size, int max_buffer_size) {
+  char* index = memmem(buffer, buffer_size, REQUEST_END, 4);
+  if (index == NULL) return NULL;
+  if ((index + 4) - buffer >= max_buffer_size) return NULL;
+  return index + 4; // pointer to the message body
+}
+
+/* Determines what kind of request was made */
+int get_resource(char* buffer, char* buffer_end) {
+  if (memmem(buffer, buffer_end - buffer, GET_ROOT, sizeof(GET_ROOT) - 1)) return 0;
+  if (memmem(buffer, buffer_end - buffer, GET_INFO, sizeof(GET_INFO) - 1)) return 1;
+  if (memmem(buffer, buffer_end - buffer, POST_INFO, sizeof(POST_INFO) - 1)) return 2;
+  if (memmem(buffer, buffer_end - buffer, GET_FAVICON, sizeof(GET_FAVICON) - 1)) return 3;
+  return -1;
+}
+
+/* Returns the current date and time */
+void dateIs(char* date_b) {
+ time_t clock;
+  clock = time(NULL);
+  strcpy(date_b, ctime(&clock));
+  int len = strlen(date_b) - 1;
+  strcpy(date_b + len, "\r\n");
+}
+
+/* for debugging */
+void printBuffer(char* buffer, int bufsize) {
+  printf("\nPRINT BUFFER:\n");
+  char c = '\0';
+  for (int i = 0; i < bufsize; i++) {
+    if (buffer[i] == '\r') {
+      putchar('\\');
+      putchar('r');
+      putchar('\n');
+    }
+    else if (buffer[i] == '\n') {
+      putchar('\\');
+      putchar('n');
+      putchar('\n');
+    }
+    else if (buffer[i] == '\0') {
+      putchar('\\');
+      putchar('0');
+      putchar('\n');
+    }
+    else {
+      putchar(buffer[i]);
+    }
+  }
+}
+
+/* Puts together a response with data as the message body */
+void create_response(char* response, char* data, int type) {
+  char dateNow[100];
+  dateIs(dateNow);
+
+  *response = '\0';
+  strcat(response, RESPONSE_OK);
+  strcat(response, DATE);
+  strcat(response, dateNow);
+  strcat(response, SERVER);
+  strcat(response, STUDENT);
+  strcat(response, CRLF);
+  strcat(response, CONTENT_LENGTH);
+  char cl[1024] = ""; // content length
+  int data_length = strnlen(data, 1024);
+  sprintf(cl, response, data_length);
+  strcpy(response, cl);
+  strcat(response, CONNECTION);
+  strcat(response, (CONTENT_TYPE(type)));
+  strcat(response, CRLF);
+
+  strlcat(response + strlen(response), data, MAX_RESPONSE_SIZE);
+  /* for debugging */
+  /* printf("in create response:\n%s\n", response); */
+  /* int len = strlen(response); */
+  /* printBuffer(response, len); */
+}
+
+/*
+  Locates the Content-Length value; puts that many characters from the message
+  body into a buffer; returns that value.
+ */
+int get_message(char* message, char* buf, char* buf_req) {
+  char* content_length = "Content-Length: ";
+  int content_length_s = strlen(content_length);
+  char* cl = memmem(buf, READ_BUFFER_SIZE, content_length, content_length_s);
+  if (!cl) {
+    fprintf(stderr, "ERROR getting message\n");
+    exit(1);
+  }
+  int l;
+  if (sscanf(cl + content_length_s, "%d", &l) != 1) {
+    fprintf(stderr, "ERROR scanning content-length number\n");
+    exit(1);
+  }
+  memcpy(message, buf_req, l);
+  return l;
 }
 
 int main(void)
@@ -115,6 +250,12 @@ int main(void)
 
   printf("server: waiting for connections...\n");
 
+  STUDENT = getenv("STUDENT_NAME");
+  if (STUDENT == NULL) {
+    fprintf(stderr, "ERROR: need to provide environment variable STUDENT_NAME\n");
+    exit(1);
+  }
+
   while(1) {  // main accept() loop
     sin_size = sizeof their_addr;
     new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
@@ -130,19 +271,103 @@ int main(void)
 
     if (!fork()) { // this is the child process
       // LS: read from client input
-      const int READ_BUFFER_SIZE = 1024;
       char buffer[READ_BUFFER_SIZE];
       int read_result = read(new_fd, &buffer, READ_BUFFER_SIZE);
-      printf("read_result: %d\n", read_result);
-      printf("buffer: %s\n", buffer);
+      printf("\nread_result: %d bytes read\n", read_result);
+      printf("buffer:\n%s\n", buffer);
+
+      /*
+        request() searches the GET or POST request for a blank line;
+        if one is found, a pointer to the start of the message body
+        is returned; if not, NULL is returned.
+       */
+      char* request = get_request(buffer, read_result, READ_BUFFER_SIZE);
+      if (!request) {
+        fprintf(stderr, "ERROR: failed to find a REQUEST_END\n");
+        exit(1);
+      }
 
       // LS: loop above until \n\n is sent, signaling the end of an HTTP request
-
       // LS: parse the input and determine what result to send
+
+      char* response = malloc(READ_BUFFER_SIZE);
+      char* root = malloc(READ_BUFFER_SIZE);
+      char* template;
+      char* info;
+      char* message;
+      FILE* fd;
+
+      switch (get_resource(buffer, request)) {
+      case 0: // GET /
+        template = "<html><head></head><body>Welcome to %s</body></html>\n";
+        sprintf(root, template, STUDENT);
+        create_response(response, root, 0);
+        break;
+
+      case 1: // GET /info
+        info = malloc(1024);
+        char* last_msg = malloc(1024);
+        template = malloc(READ_BUFFER_SIZE);
+        strcpy(template, "{\"info\": {\"name\": \"%s\", \"url_request\": \"/info\", \"last_message\": \"%s\"}}\r\n\r\n");
+
+        if ((fd = fopen(MSG_FILE, "a+")) == NULL) {
+          fprintf(stderr, "ERROR opening file for reading\n");
+          exit(1);
+        }
+        rewind(fd);
+        clearerr(fd);
+        size_t didRead = fread(last_msg, BYTE, READ_BUFFER_SIZE, fd);
+        if (ferror(fd) != 0) {
+          fprintf(stderr, "ERROR opening file for reading\n");
+          exit(1);
+        }
+        if (didRead == 0) {
+          fprintf(stderr, "didRead is zero\n");
+          fprintf(stderr, "last_msg is %s\n", last_msg);
+          strcpy(last_msg, UNDEFINED);
+        }
+        sprintf(info, template, STUDENT, last_msg);
+        printf("JSON:\n%s\n", info);
+        fclose(fd);
+
+        create_response(response, info, 0);
+        break;
+
+      case 2: // POST /info
+        message = malloc(READ_BUFFER_SIZE - read_result);
+        int length = get_message(message, buffer, request);
+        if (length == -1) {
+          fprintf(stderr, "ERROR: no message found in a POST request\n");
+          exit(1);
+        }
+        if ((fd = fopen(MSG_FILE, "w")) == NULL) {
+          fprintf(stderr, "ERROR opening file for writing\n");
+          exit(1);
+        }
+        if ((fprintf(fd, "%s\n", message) != length + 1)) {
+          fprintf(stderr, "ERROR writing message to file\n");
+          exit(1);
+        }
+        printf("POSTED: \n%s\n", message);
+        fclose(fd);
+        break;
+
+      case 3: // favicon
+        fprintf(stderr, "received a request for a favicon; ignoring\n");
+        break;
+
+      default:
+        fprintf(stderr, "ERROR: failed to find a proper get request\n");
+        exit(1);
+        break;
+      }
+
       close(sockfd); // child doesn't need the listener
       // LS: Send the correct response in JSON format
-      if (send(new_fd, "Hello, world!", 13, 0) == -1)
+      int size = strnlen(response, READ_BUFFER_SIZE);
+      if (send(new_fd, response, 1024, 0) == -1)
         perror("send");
+
       close(new_fd);
       exit(0);
     }
