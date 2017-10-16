@@ -11,6 +11,7 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <time.h>
 
 #define PORT "7080"  // the port users will be connecting to
 
@@ -163,11 +164,52 @@ int main(void)
 // **********************************************************************************************
 // The part I am changing - for reading
 // **********************************************************************************************
-      if (buffer[0] == 'G')
+      char postInfo[7] = {'P', 'O', 'S', 'T', ' ', '/', };
+      char getInfo[10] = {'G', 'E', 'T', ' ', '/', 'i', 'n', 'f', 'o', '\0'};
+      char getSlash[6] = {'G', 'E', 'T', ' ', '/', '\0'};
+      // char line1[16] = {"HTTP/1.0 200 OK\n"};
+      // char line2[6] = {"Date: "}; // find a way to stick a date in there
+      time_t date = time(NULL); // c string with \n at the end
+      // char newLine[1] = {"\n"};
+      // char line3[14] = {"Server: Sarah\n"};
+      // char line4[16] = {"Content-Length: "}; // add the read_result
+      // char line5[18] = {"Connection: close\n"};
+      // char line6[24] = {"Content-Type: text/html\n"};
+      char getSlashResponse[64] = {"<html><head></head><body>Welcome to Sarah's server</body></html>"};
+      // char getInfoResponse[] = {"info": {"name: Sarah", "url_request": "/info", "last_message": };
+      char noPrevPost[9] = {"undefined"};
+      // char postInfoResponse[] = ; // put in the message they sent
+      // char* thisResponse = calloc(2048 * sizeof(char));
+      char buff[2048];
+      int len;
+      char lastMessage[1025];
+      int lastMessageLen;
+      
+      if (strstr(buffer, getSlash))
       {
-        printf("This is a GET");
+        // len = snprintf(buff, 2048, "<html><head>HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text\html\n</head><body>Welcome To Sarah's Server</body></html>",date, read_result);
+        // for (int m = 0; m < 2048; ++m)
+        // {
+        //   buff[m] = 0;
+        // }
+        len = snprintf(buff, 2048, "<html><head>HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text/html\n</head><body>Welcome To Sarah's Server</body></html>\n\n",date, read_result);
+        // len = snprintf(buff, 31, "HTTP/1.0 200 OK\n\n<html></html>");
+        printf("\nFound\n");
       }
-      printf("buffer[0]: %c\n", buffer[0]);
+      else if (strstr(buffer, getInfo) && lastMessageLen == 0)
+      {
+        len = snprintf(buff, 2048, "HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text\html\n<html><head></head><body>{\"info\": {\"name\": \"Sarah\", \"url_request\": \"/info\", \"last_message\": \"undefined\"}}</body></html>",date, read_result);
+      }
+      else if (strstr(buffer, getInfo) && lastMessageLen > 0)
+      {
+        len = snprintf(buff, 2048, "HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text\html\n<html><head></head><body>{\"info\": {\"name\": \"Sarah\", \"url_request\": \"/info\", \"last_message\": \"%s\"}}</body></html>",date, read_result, lastMessage);
+      }
+      // else if (strstr(buffer, postInfo))
+      // {
+      //   lastMessageLen = sprintf(lastMessage, // all the things in the message section);
+      //   len = snprintf(buff, 2048, "HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text\html\n<html><head></head><body>{"info": {"name": "Sarah", "url_request": "/info", "last_message": "%s"}}</body></html>",date, read_result, lastMessage);
+      // }
+
 // **********************************************************************************************
       // LS: loop above until \n\n is sent, signaling the end of an HTTP request
 
@@ -179,7 +221,8 @@ int main(void)
 // **********************************************************************************************
 // The part I am changing - for sending 
 // **********************************************************************************************
-      if (send(new_fd, "HTTP/1.0 200 OK\n\n<html><\\html>", 32, 0) == -1) // thanks Patrick!  :)
+      // if (send(new_fd, "HTTP/1.0 200 OK\n\n<html></html>", 31, 0) == -1) // thanks Patrick!
+      if (send(new_fd, buff, len, 0) == -1)
 // **********************************************************************************************
         perror("send");
       close(new_fd);
@@ -189,4 +232,12 @@ int main(void)
   }
 
   return 0;
+}
+
+void clear(int number)
+{
+  for (int i = 0; i < number; ++i)
+  {
+    
+  }
 }
