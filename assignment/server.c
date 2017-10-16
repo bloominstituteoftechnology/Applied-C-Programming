@@ -1,6 +1,6 @@
 /*
 ** server.c -- a stream socket server demo
-** version 0.2_c
+** version 0.2_d
 */
 
 #include <stdio.h>
@@ -302,7 +302,21 @@ int main(void)
       case 1: // GET /info
         fprintf(stderr, "found a proper get info request\n");
         char* info = malloc(1024);
-        
+        char* last_msg = malloc(1024);
+        template = malloc(READ_BUFFER_SIZE);
+        strcpy(template, "{\"info\": {\"name\": \"%s\", \"url_request\": \"/info\", \"last_message\": \"%s\"}}\r\n\r\n");
+        /* TODO: NEED TO CHECK IF FILE EXISTS OR NOT */
+        if ((fd = fopen(MSG_FILE, "r")) == NULL) {
+          fprintf(stderr, "ERROR opening file for reading\n");
+          exit(1);
+        }
+        size_t didRead = fread(last_msg, BYTE, READ_BUFFER_SIZE, fd);
+        if (didRead > 0) {
+          sprintf(info, template, STUDENT, last_msg);
+          printf("JSON:\n%s\n", info);
+        }
+        fclose(fd);
+        memmove(response, info, READ_BUFFER_SIZE);
         break;
 
       case 2: // POST /info
@@ -313,7 +327,7 @@ int main(void)
           exit(1);
         }
         if ((fd = fopen(MSG_FILE, "w")) == NULL) {
-          fprintf(stderr, "ERROR opening file for appending");
+          fprintf(stderr, "ERROR opening file for writing\n");
           exit(1);
         }
         if ((fprintf(fd, "%s\n", message) != length + 1)) {
