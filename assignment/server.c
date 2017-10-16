@@ -1,6 +1,6 @@
 /*
 ** server.c -- a stream socket server demo
-** version 0.2_d
+** version 0.3_a
 */
 
 #include <stdio.h>
@@ -32,7 +32,8 @@
 #define SERVER         "Server: "
 #define CONTENT_LENGTH "Content-Length: %d\r\n"
 #define CONNECTION     "Connection: close\r\n"
-#define CONTENT_TYPE   "Content-Type: text/html\r\n"
+#define CONTENT_TYPE_TEXT   "Content-Type: text/html\r\n"
+#define CONTENT_TYPE_JSON   "Content-Type: application/json\r\n"
 
 #define READ_BUFFER_SIZE  1024
 #define MAX_RESPONSE_SIZE 1024
@@ -131,7 +132,7 @@ void printBuffer(char* buffer, int bufsize) {
 }
 
 /* Puts together a response with data as the message body */
-void create_response(char* response, char* data) {
+void create_response(char* response, char* data, int type) {
   char dateNow[100];
   dateIs(dateNow);
 
@@ -148,7 +149,14 @@ void create_response(char* response, char* data) {
   sprintf(cl, response, data_length);
   strcpy(response, cl);
   strcat(response, CONNECTION);
-  strcat(response, CONTENT_TYPE);
+  switch (type) {
+  case 0:
+    strcat(response, CONTENT_TYPE_TEXT);
+    break;
+  case 1:
+    strcat(response, CONTENT_TYPE_JSON);
+    break;
+  }
   strcat(response, CRLF);
 
   strlcat(response + strlen(response), data, MAX_RESPONSE_SIZE);
@@ -296,7 +304,7 @@ int main(void)
       case 0: // GET /
         template = "<html><head></head><body>Welcome to %s</body></html>\n";
         sprintf(root, template, STUDENT);
-        create_response(response, root);
+        create_response(response, root, 0);
         break;
 
       case 1: // GET /info
@@ -316,7 +324,8 @@ int main(void)
           printf("JSON:\n%s\n", info);
         }
         fclose(fd);
-        memmove(response, info, READ_BUFFER_SIZE);
+        /* memmove(response, info, READ_BUFFER_SIZE); */
+        create_response(response, info, 0);
         break;
 
       case 2: // POST /info
