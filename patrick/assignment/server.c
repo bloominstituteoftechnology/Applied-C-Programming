@@ -16,12 +16,14 @@
 #include <sys/wait.h>   // defines symbolic constants for use with waitpid(): http://pubs.opengroup.org/onlinepubs/7908799/xsh/syswait.h.html
 #include <signal.h>     // signal handling functions, expanded types: http://pubs.opengroup.org/onlinepubs/7908799/xsh/signal.h.html
 
-// #include "index.html" // My stuff.
+// #include "index.html" // HTML stuff?
 
 /* Macros */
 #define PORT "7080"  // the port users will be connecting to
 
 #define GET_ROOT "GET / HTTP/1.1"
+#define ROOT_INDEX_HTTP_HTML "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>"
+#define ROOT_INFO "{\"info\": {\"name\":\":::student name:::\", \"url_request\": \"/info\", \"last_message\": \":::undefined::: OR :::POST message:::\"}}"
 #define GET_INFO "GET /info HTTP/1.1"
 #define POST_INFO "POST /info HTTP/1.1"
 #define DATE "Date:"
@@ -191,29 +193,30 @@ int main(void)
       close(sockfd); // child doesn't need the listener
 
       // if option = 1; or SWITCH
-      switch(option)
+      switch(option) {
       case 1:
-        if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
+        if (send(new_fd, ROOT_INDEX_HTTP_HTML, strlen(ROOT_INDEX_HTTP_HTML), 0) == -1)
           perror("send");
         break;
       case 2:
-        if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
+        if (send(new_fd, ROOT_INFO, strlen(ROOT_INFO), 0) == -1)
           perror("send");
         break;
       case 3:
         if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
           perror("send");
         break;
-      case 4:
-        if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
-          perror("send");
-        break;
-      case 5:
-        if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
-          perror("send");
-        break;
+      // case 4:
+      //   if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
+      //     perror("send");
+      //   break;
+      // case 5:
+      //   if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
+      //     perror("send");
+      //   break;
       default:
         break;
+      }
       // LS: Send the correct response in JSON format
       // if (send(new_fd, "Hello, world!", 13, 0) == -1)
       // if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
