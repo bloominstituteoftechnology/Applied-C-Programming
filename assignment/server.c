@@ -185,24 +185,19 @@ int main(void)
       char lastMessage[1025];
       int lastMessageLen;
       
-      if (strstr(buffer, getSlash))
+      if (strstr(buffer, getInfo) && lastMessageLen == 0)
       {
-        // len = snprintf(buff, 2048, "<html><head>HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text\html\n</head><body>Welcome To Sarah's Server</body></html>",date, read_result);
-        // for (int m = 0; m < 2048; ++m)
-        // {
-        //   buff[m] = 0;
-        // }
-        len = snprintf(buff, 2048, "<html><head>HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text/html\n</head><body>Welcome To Sarah's Server</body></html>\n\n",date, read_result);
-        // len = snprintf(buff, 31, "HTTP/1.0 200 OK\n\n<html></html>");
-        printf("\nFound\n");
-      }
-      else if (strstr(buffer, getInfo) && lastMessageLen == 0)
-      {
-        len = snprintf(buff, 2048, "HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text\html\n<html><head></head><body>{\"info\": {\"name\": \"Sarah\", \"url_request\": \"/info\", \"last_message\": \"undefined\"}}</body></html>",date, read_result);
+        len = snprintf(buff, 2048, "<html><head>HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text\html\n<head><body>{\"info\": {\"name\": \"Sarah\", \"url_request\": \"/info\", \"last_message\": \"undefined\"}}</body></html>",date, read_result);
+        printf("\nGet info, no previous message\n");
       }
       else if (strstr(buffer, getInfo) && lastMessageLen > 0)
       {
         len = snprintf(buff, 2048, "HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text\html\n<html><head></head><body>{\"info\": {\"name\": \"Sarah\", \"url_request\": \"/info\", \"last_message\": \"%s\"}}</body></html>",date, read_result, lastMessage);
+      }
+      else if (strstr(buffer, getSlash))
+      {
+        len = snprintf(buff, 2048, "<html><head>HTTP/1.0 OK\nDate: %dServer: Sarah\nContent-Length: %d\nConnection: Close\nContent-Type: text/html\n</head><body>Welcome To Sarah's Server</body></html>\n\n",date, read_result);
+        printf("\nFound\n");
       }
       // else if (strstr(buffer, postInfo))
       // {
