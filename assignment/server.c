@@ -1,6 +1,6 @@
 /*
 ** server.c -- a stream socket server demo
-** version 0.2
+** version 0.2_a
 */
 
 #include <stdio.h>
@@ -18,7 +18,6 @@
 #include <sys/time.h>
 
 #define PORT "7080"  // the port users will be connecting to
-#define STUDENT "WESLEY L. HARVEY"
 
 // some HTTP requests
 #define GET_ROOT  "GET / HTTP/1.1"
@@ -34,6 +33,7 @@
 #define CONTENT_LENGTH "Content-Length: %d\r\n"
 #define CONNECTION     "Connection: close\r\n"
 #define CONTENT_TYPE   "Content-Type: text/html\r\n"
+#define READ_BUFFER_SIZE  1024
 #define MAX_RESPONSE_SIZE 1024
 
 #define BACKLOG 10   // how many pending connections queue will hold
@@ -42,7 +42,8 @@
 #define CRLF "\r\n"
 #define REQUEST_END "\r\n\r\n"
 
-char* STUDENT_;
+#define MAX_STUDENT_LEN 24
+char* STUDENT; // to be filled-in by environment variable STUDENT_NAME
 
 void sigchld_handler(int s)
 {
@@ -205,8 +206,11 @@ int main(void)
 
   printf("server: waiting for connections...\n");
 
-  STUDENT_ = (char*)malloc(24);
-  strncpy(STUDENT_, getenv("STUDENT_NAME"), 24);
+  STUDENT = getenv("STUDENT_NAME");
+  if (STUDENT == NULL) {
+    fprintf(stderr, "ERROR: need to provide environment variable STUDENT_NAME\n");
+    exit(1);
+  }
 
   while(1) {  // main accept() loop
     sin_size = sizeof their_addr;
@@ -223,11 +227,10 @@ int main(void)
 
     if (!fork()) { // this is the child process
       // LS: read from client input
-      const int READ_BUFFER_SIZE = 1024;
       char buffer[READ_BUFFER_SIZE];
       int read_result = read(new_fd, &buffer, READ_BUFFER_SIZE);
-      printf("read_result: %d\n", read_result);
-      printf("buffer: %s\n", buffer);
+      printf("\nread_result: %d bytes read\n", read_result);
+      printf("buffer:\n%s\n", buffer);
 
       char* request = get_request(buffer, read_result, READ_BUFFER_SIZE);
       if (!request) {
@@ -235,30 +238,28 @@ int main(void)
         exit(1);
       }
 
-      printf("got end at %p\n", request);
-
       // LS: loop above until \n\n is sent, signaling the end of an HTTP request
-
       // LS: parse the input and determine what result to send
 
       char* response = malloc(READ_BUFFER_SIZE);
-      char* response_pos = response;
+      char* root = malloc(READ_BUFFER_SIZE);
+      char* template;
+      char* info;
+      char* message;
 
       switch (get_resource(buffer, request)) {
       case 0: // get root
-        fprintf(stderr, "found a proper get request\n");
-        char* root = "<html><head></head><body>Welcome to "STUDENT"</body></html>";
-        /* char* root = ""; */
-        /* sprintf(root, template, STUDENT); */
+        template = "<html><head></head><body>Welcome to %s</body></html>\n";
+        sprintf(root, template, STUDENT);
         create_response(response, root);
         break;
       case 1: // get info
         fprintf(stderr, "found a proper get info request\n");
-        char* info = "";
+        info = "";
         break;
       case 2: // post info
-        fprintf(stderr, "found a propert post info request\n");
-        char* message = "";
+        fprintf(stderr, "found a post info request\n");
+        message = "";
         break;
       case 3: // favicon
         fprintf(stderr, "received a request for a favicon; ignoring\n");
@@ -272,8 +273,9 @@ int main(void)
       close(sockfd); // child doesn't need the listener
       // LS: Send the correct response in JSON format
       int size = strnlen(response, READ_BUFFER_SIZE);
-      if (send(new_fd, response, size, 0) == -1)
+      if (send(new_fd, response, 1024, 0) == -1)
         perror("send");
+
       close(new_fd);
       exit(0);
     }
