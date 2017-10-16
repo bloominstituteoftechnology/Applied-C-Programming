@@ -1,6 +1,6 @@
 /*
 ** server.c -- a stream socket server demo
-** version 0.2_a
+** version 0.2_b
 */
 
 #include <stdio.h>
@@ -33,8 +33,10 @@
 #define CONTENT_LENGTH "Content-Length: %d\r\n"
 #define CONNECTION     "Connection: close\r\n"
 #define CONTENT_TYPE   "Content-Type: text/html\r\n"
+
 #define READ_BUFFER_SIZE  1024
 #define MAX_RESPONSE_SIZE 1024
+#define MAX_STUDENT_LEN 24
 
 #define BACKLOG 10   // how many pending connections queue will hold
 
@@ -42,8 +44,12 @@
 #define CRLF "\r\n"
 #define REQUEST_END "\r\n\r\n"
 
-#define MAX_STUDENT_LEN 24
 char* STUDENT; // to be filled-in by environment variable STUDENT_NAME
+#define MSG_FILE "last_message.txt"
+
+
+
+
 
 void sigchld_handler(int s)
 {
@@ -67,10 +73,17 @@ void *get_in_addr(struct sockaddr *sa)
 
 
 
-/* Finds a blank line in the request */
+
+
+/*
+  Finds a blank line in the request; returns pointer to the start of the message body
+   or NULL if no blank line could be found
+ */
 char* get_request(char* buffer, int buffer_size, int max_buffer_size) {
   char* index = memmem(buffer, buffer_size, REQUEST_END, 4);
-  return index; // NULL if REQUEST_END not found
+  if (index == NULL) return NULL;
+  if ((index + 4) - buffer >= max_buffer_size) return NULL;
+  return index + 4; // pointer to the message body
 }
 
 /* Determines what kind of request was made */
@@ -106,6 +119,11 @@ void printBuffer(char* buffer, int bufsize) {
       putchar('n');
       putchar('\n');
     }
+    else if (buffer[i] == '\0') {
+      putchar('\\');
+      putchar('0');
+      putchar('\n');
+    }
     else {
       putchar(buffer[i]);
     }
@@ -138,6 +156,27 @@ void create_response(char* response, char* data) {
   /* printf("in create response:\n%s\n", response); */
   /* int len = strlen(response); */
   /* printBuffer(response, len); */
+}
+
+/*
+  Locates the Content-Length value; puts that many characters from the message
+  body into a buffer; returns that value.
+ */
+int get_message(char* message, char* buf, char* buf_req) {
+  char* content_length = "Content-Length: ";
+  int content_length_s = strlen(content_length);
+  char* cl = memmem(buf, READ_BUFFER_SIZE, content_length, content_length_s);
+  if (!cl) {
+    fprintf(stderr, "ERROR getting message\n");
+    exit(1);
+  }
+  int l;
+  if (sscanf(cl + content_length_s, "%d", &l) != 1) {
+    fprintf(stderr, "ERROR scanning content-length number\n");
+    exit(1);
+  }
+  memcpy(message, buf_req, l);
+  return l;
 }
 
 int main(void)
@@ -232,6 +271,11 @@ int main(void)
       printf("\nread_result: %d bytes read\n", read_result);
       printf("buffer:\n%s\n", buffer);
 
+      /*
+        request() searches the GET or POST request for a blank line;
+        if one is found, a pointer to the start of the message body
+        is returned; if not, NULL is returned.
+       */
       char* request = get_request(buffer, read_result, READ_BUFFER_SIZE);
       if (!request) {
         fprintf(stderr, "ERROR: failed to find a REQUEST_END\n");
@@ -246,20 +290,30 @@ int main(void)
       char* template;
       char* info;
       char* message;
+      FILE* fd;
 
       switch (get_resource(buffer, request)) {
-      case 0: // get root
+      case 0: // GET /
         template = "<html><head></head><body>Welcome to %s</body></html>\n";
         sprintf(root, template, STUDENT);
         create_response(response, root);
         break;
-      case 1: // get info
+      case 1: // GET /info
         fprintf(stderr, "found a proper get info request\n");
         info = "";
         break;
-      case 2: // post info
-        fprintf(stderr, "found a post info request\n");
-        message = "";
+      case 2: // POST /info
+        message = malloc(READ_BUFFER_SIZE - read_result);
+        int length = get_message(message, buffer, request);
+        if (length == -1) {
+          fprintf(stderr, "ERROR: no message found in a POST request\n");
+          exit(1);
+        }
+        printf("MESSAGE: \n%s\n", message);
+        if ((fd = fopen(MSG_FILE, "a")) == NULL) {
+          fprintf(stderr, "ERROR opening file for appending");
+          exit(1);
+        }
         break;
       case 3: // favicon
         fprintf(stderr, "received a request for a favicon; ignoring\n");
