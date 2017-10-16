@@ -163,6 +163,7 @@ int main(void)
         https://linux.die.net/man/3/strstr
       */
       int option;
+      /* GET */
       if (strstr(buffer, GET_INFO)) {
         option = 2;
         puts("Found GET /info");
@@ -170,14 +171,15 @@ int main(void)
         option = 1;
         puts("Found GET /");
       }
+
+      /* POST */
       char searchPOST[5] = {'P', 'O', 'S', 'T', '\0'};
       if (strstr(buffer, searchPOST)) {
       // if (strstr(buffer, POST_INFO)) {
         option = 3;
         puts("Found POST, what about posting to /info???");
         // puts("Found POST /info");
-      }
-      if (strstr(buffer, POST_INFO)) {
+      } else if (strstr(buffer, POST_INFO)) {
         option = 3;
         puts("Found POST /info");
       }
