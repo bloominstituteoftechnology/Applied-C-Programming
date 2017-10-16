@@ -21,9 +21,9 @@
 /* Macros */
 #define PORT "7080"  // the port users will be connecting to
 
-#define GET_ROOT "GET / HTTP/1.0"
-#define GET_INFO "GET /info HTTP/1.0"
-#define POST_INFO "POST /info HTTP/1.0"
+#define GET_ROOT "GET / HTTP/1.1"
+#define GET_INFO "GET /info HTTP/1.1"
+#define POST_INFO "POST /info HTTP/1.1"
 #define DATE "Date:"
 #define SERVER "Server:"
 #define CONTENT_LENGTH "Content-Length:"
@@ -163,19 +163,18 @@ int main(void)
         https://linux.die.net/man/3/strstr
       */
       int option;
-      if (strstr(buffer, GET_ROOT)) {
-        option = 1;
-        puts("Found GET /");
-      }
       if (strstr(buffer, GET_INFO)) {
         option = 2;
         puts("Found GET /info");
+      } else if (strstr(buffer, GET_ROOT)) {
+        option = 1;
+        puts("Found GET /");
       }
       char searchPOST[5] = {'P', 'O', 'S', 'T', '\0'};
       if (strstr(buffer, searchPOST)) {
       // if (strstr(buffer, POST_INFO)) {
         option = 3;
-        puts("Found POST, what avout posting to /info???");
+        puts("Found POST, what about posting to /info???");
         // puts("Found POST /info");
       }
       if (strstr(buffer, POST_INFO)) {
