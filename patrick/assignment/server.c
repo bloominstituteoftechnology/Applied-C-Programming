@@ -16,7 +16,7 @@
 #include <sys/wait.h>   // defines symbolic constants for use with waitpid(): http://pubs.opengroup.org/onlinepubs/7908799/xsh/syswait.h.html
 #include <signal.h>     // signal handling functions, expanded types: http://pubs.opengroup.org/onlinepubs/7908799/xsh/signal.h.html
 
-#include "index.h" // My shit.
+// #include "index.html" // My stuff.
 
 /* Macros */
 #define PORT "7080"  // the port users will be connecting to
@@ -166,22 +166,22 @@ int main(void)
       /* GET */
       if (strstr(buffer, GET_INFO)) {
         option = 2;
-        puts("Found GET /info");
+        puts("Found GET /info\n");
       } else if (strstr(buffer, GET_ROOT)) {
         option = 1;
-        puts("Found GET /");
+        puts("Found GET /\n");
       }
 
       /* POST */
-      char searchPOST[5] = {'P', 'O', 'S', 'T', '\0'};
-      if (strstr(buffer, searchPOST)) {
-      // if (strstr(buffer, POST_INFO)) {
+      // char searchPOST[5] = {'P', 'O', 'S', 'T', '\0'};
+      // if (strstr(buffer, searchPOST)) {
+      //   option = 3;
+      //   puts("Found POST /, what about posting to /info???\n");
+      // } else
+
+      if (strstr(buffer, POST_INFO)) {
         option = 3;
-        puts("Found POST, what about posting to /info???");
-        // puts("Found POST /info");
-      } else if (strstr(buffer, POST_INFO)) {
-        option = 3;
-        puts("Found POST /info");
+        puts("Found POST /info\n");
       }
 
       // LS: parse the input and determine what result to send
@@ -191,7 +191,7 @@ int main(void)
 
       // LS: Send the correct response in JSON format
       // if (send(new_fd, "Hello, world!", 13, 0) == -1)
-      if (send(new_fd, "HTTP/1.0 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
+      if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
         perror("send");
       close(new_fd);
       exit(0);
