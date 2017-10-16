@@ -1,5 +1,6 @@
 /*
 ** server.c -- a stream socket server demo
+** version 0.2
 */
 
 #include <stdio.h>
@@ -14,22 +15,34 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <sys/time.h>
 
 #define PORT "7080"  // the port users will be connecting to
+#define STUDENT "WESLEY L. HARVEY"
 
-#define GET_ROOT "GET / HTTP/1.1"
-#define GET_INFO "GET /info HTTP/1.1"
+// some HTTP requests
+#define GET_ROOT  "GET / HTTP/1.1"
+#define GET_INFO  "GET /info HTTP/1.1"
 #define POST_INFO "POST /info HTTP/1.1"
-#define DATE "Date:"
-#define SERVER "Server:"
-#define CONTENT_LENGTH "Content-Length:"
-#define CONNECTION "Connection: close"
-#define CONTENT_TYPE "Content-Type: text/html"
+#define GET_FAVICON "GET /favicon.ico HTTP/1.1"
+
+// HTTP response components
+#define STATUS_OK      "200 OK"
+#define RESPONSE_OK    "HTTP/1.1 "STATUS_OK"\r\n"
+#define DATE           "Date: "
+#define SERVER         "Server: "
+#define CONTENT_LENGTH "Content-Length: %d\r\n"
+#define CONNECTION     "Connection: close\r\n"
+#define CONTENT_TYPE   "Content-Type: text/html\r\n"
+#define MAX_RESPONSE_SIZE 1024
 
 #define BACKLOG 10   // how many pending connections queue will hold
 
 #define BYTE sizeof(char)
+#define CRLF "\r\n"
 #define REQUEST_END "\r\n\r\n"
+
+char* STUDENT_;
 
 void sigchld_handler(int s)
 {
@@ -41,7 +54,6 @@ void sigchld_handler(int s)
   errno = saved_errno;
 }
 
-
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -52,16 +64,79 @@ void *get_in_addr(struct sockaddr *sa)
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+
+
+/* Finds a blank line in the request */
 char* get_request(char* buffer, int buffer_size, int max_buffer_size) {
   char* index = memmem(buffer, buffer_size, REQUEST_END, 4);
   return index; // NULL if REQUEST_END not found
 }
 
+/* Determines what kind of request was made */
 int get_resource(char* buffer, char* buffer_end) {
   if (memmem(buffer, buffer_end - buffer, GET_ROOT, sizeof(GET_ROOT) - 1)) return 0;
   if (memmem(buffer, buffer_end - buffer, GET_INFO, sizeof(GET_INFO) - 1)) return 1;
   if (memmem(buffer, buffer_end - buffer, POST_INFO, sizeof(POST_INFO) - 1)) return 2;
+  if (memmem(buffer, buffer_end - buffer, GET_FAVICON, sizeof(GET_FAVICON) - 1)) return 3;
   return -1;
+}
+
+/* Returns the current date and time */
+void dateIs(char* date_b) {
+ time_t clock;
+  clock = time(NULL);
+  strcpy(date_b, ctime(&clock));
+  int len = strlen(date_b) - 1;
+  strcpy(date_b + len, "\r\n");
+}
+
+/* for debugging */
+void printBuffer(char* buffer, int bufsize) {
+  printf("\nPRINT BUFFER:\n");
+  char c = '\0';
+  for (int i = 0; i < bufsize; i++) {
+    if (buffer[i] == '\r') {
+      putchar('\\');
+      putchar('r');
+      putchar('\n');
+    }
+    else if (buffer[i] == '\n') {
+      putchar('\\');
+      putchar('n');
+      putchar('\n');
+    }
+    else {
+      putchar(buffer[i]);
+    }
+  }
+}
+
+/* Puts together a response with data as the message body */
+void create_response(char* response, char* data) {
+  char dateNow[100];
+  dateIs(dateNow);
+
+  *response = '\0';
+  strcat(response, RESPONSE_OK);
+  strcat(response, DATE);
+  strcat(response, dateNow);
+  strcat(response, SERVER);
+  strcat(response, STUDENT);
+  strcat(response, CRLF);
+  strcat(response, CONTENT_LENGTH);
+  char cl[1024] = ""; // content length
+  int data_length = strnlen(data, 1024);
+  sprintf(cl, response, data_length);
+  strcpy(response, cl);
+  strcat(response, CONNECTION);
+  strcat(response, CONTENT_TYPE);
+  strcat(response, CRLF);
+
+  strlcat(response + strlen(response), data, MAX_RESPONSE_SIZE);
+  /* for debugging */
+  /* printf("in create response:\n%s\n", response); */
+  /* int len = strlen(response); */
+  /* printBuffer(response, len); */
 }
 
 int main(void)
@@ -130,6 +205,9 @@ int main(void)
 
   printf("server: waiting for connections...\n");
 
+  STUDENT_ = (char*)malloc(24);
+  strncpy(STUDENT_, getenv("STUDENT_NAME"), 24);
+
   while(1) {  // main accept() loop
     sin_size = sizeof their_addr;
     new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
@@ -156,21 +234,34 @@ int main(void)
         fprintf(stderr, "ERROR: failed to find a REQUEST_END\n");
         exit(1);
       }
+
       printf("got end at %p\n", request);
 
       // LS: loop above until \n\n is sent, signaling the end of an HTTP request
 
       // LS: parse the input and determine what result to send
 
+      char* response = malloc(READ_BUFFER_SIZE);
+      char* response_pos = response;
+
       switch (get_resource(buffer, request)) {
-      case 0:
+      case 0: // get root
         fprintf(stderr, "found a proper get request\n");
+        char* root = "<html><head></head><body>Welcome to "STUDENT"</body></html>";
+        /* char* root = ""; */
+        /* sprintf(root, template, STUDENT); */
+        create_response(response, root);
         break;
-      case 1:
+      case 1: // get info
         fprintf(stderr, "found a proper get info request\n");
+        char* info = "";
         break;
-      case 2:
+      case 2: // post info
         fprintf(stderr, "found a propert post info request\n");
+        char* message = "";
+        break;
+      case 3: // favicon
+        fprintf(stderr, "received a request for a favicon; ignoring\n");
         break;
       default:
         fprintf(stderr, "ERROR: failed to find a proper get request\n");
@@ -180,7 +271,8 @@ int main(void)
 
       close(sockfd); // child doesn't need the listener
       // LS: Send the correct response in JSON format
-      if (send(new_fd, "Hello, world!", 13, 0) == -1)
+      int size = strnlen(response, READ_BUFFER_SIZE);
+      if (send(new_fd, response, size, 0) == -1)
         perror("send");
       close(new_fd);
       exit(0);
