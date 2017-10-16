@@ -1,6 +1,6 @@
 /*
 ** server.c -- a stream socket server demo
-** version 0.3_a
+** version 0.3_b
 */
 
 #include <stdio.h>
@@ -32,8 +32,12 @@
 #define SERVER         "Server: "
 #define CONTENT_LENGTH "Content-Length: %d\r\n"
 #define CONNECTION     "Connection: close\r\n"
-#define CONTENT_TYPE_TEXT   "Content-Type: text/html\r\n"
-#define CONTENT_TYPE_JSON   "Content-Type: application/json\r\n"
+#define TEXT_HTML      "text/html"
+#define APPLICATION_JSON "application/json"
+#define CONTENT_TYPE_TEXT   "Content-Type: "TEXT_HTML"\r\n"
+#define CONTENT_TYPE_JSON   "Content-Type: "APPLICATION_JSON"\r\n"
+#define CONTENT_TYPE(type)  type==0 ? CONTENT_TYPE_TEXT : CONTENT_TYPE_JSON
+#define UNDEFINED      "undefined"
 
 #define READ_BUFFER_SIZE  1024
 #define MAX_RESPONSE_SIZE 1024
@@ -149,14 +153,7 @@ void create_response(char* response, char* data, int type) {
   sprintf(cl, response, data_length);
   strcpy(response, cl);
   strcat(response, CONNECTION);
-  switch (type) {
-  case 0:
-    strcat(response, CONTENT_TYPE_TEXT);
-    break;
-  case 1:
-    strcat(response, CONTENT_TYPE_JSON);
-    break;
-  }
+  strcat(response, (CONTENT_TYPE(type)));
   strcat(response, CRLF);
 
   strlcat(response + strlen(response), data, MAX_RESPONSE_SIZE);
@@ -308,23 +305,31 @@ int main(void)
         break;
 
       case 1: // GET /info
-        fprintf(stderr, "found a proper get info request\n");
-        char* info = malloc(1024);
+        info = malloc(1024);
         char* last_msg = malloc(1024);
         template = malloc(READ_BUFFER_SIZE);
         strcpy(template, "{\"info\": {\"name\": \"%s\", \"url_request\": \"/info\", \"last_message\": \"%s\"}}\r\n\r\n");
-        /* TODO: NEED TO CHECK IF FILE EXISTS OR NOT */
-        if ((fd = fopen(MSG_FILE, "r")) == NULL) {
+
+        if ((fd = fopen(MSG_FILE, "a+")) == NULL) {
           fprintf(stderr, "ERROR opening file for reading\n");
           exit(1);
         }
+        rewind(fd);
+        clearerr(fd);
         size_t didRead = fread(last_msg, BYTE, READ_BUFFER_SIZE, fd);
-        if (didRead > 0) {
-          sprintf(info, template, STUDENT, last_msg);
-          printf("JSON:\n%s\n", info);
+        if (ferror(fd) != 0) {
+          fprintf(stderr, "ERROR opening file for reading\n");
+          exit(1);
         }
+        if (didRead == 0) {
+          fprintf(stderr, "didRead is zero\n");
+          fprintf(stderr, "last_msg is %s\n", last_msg);
+          strcpy(last_msg, UNDEFINED);
+        }
+        sprintf(info, template, STUDENT, last_msg);
+        printf("JSON:\n%s\n", info);
         fclose(fd);
-        /* memmove(response, info, READ_BUFFER_SIZE); */
+
         create_response(response, info, 0);
         break;
 
