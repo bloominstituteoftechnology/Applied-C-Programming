@@ -155,15 +155,17 @@ int main(void)
       int option;
       char searchPOST[5] = {'P', 'O', 'S', 'T', '\0'};
       if (strstr(buffer, searchPOST)) {
+      // if (strstr(buffer, POST_INFO)) {
         option = 1;
         puts("Found POST");
       }
-
-      char searchGET[4] = {'G', 'E', 'T', '\0'};
-      if (strstr(buffer, searchGET)) {
+      if (strstr(buffer, GET_INFO)) {
         option = 2;
         puts("Found GET");
-        printf("buffer: %s\n", buffer);
+      }
+      if (strstr(buffer, GET_ROOT)) {
+        option = 2;
+        puts("Found GET");
       }
 
       /* substring - looks for a string within a string
