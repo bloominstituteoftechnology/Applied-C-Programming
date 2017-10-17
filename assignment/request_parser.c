@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #define GET_ROOT "GET / H"
 #define GET_INFO "GET /info"
 #define POST_INFO "POST /info"
 #define GET_RESPONSE_HEAD "<html><head></head><body>Welcome to Manisha's Page</body></html>"
-#define GET_RESPONSE_TAIL "\r\n\r\n"
+#define HEADER_BODY_SEPERATOR "\r\n\r\n"
 
 
 char* parse_client_request(const char* request, int size) {
@@ -19,6 +20,16 @@ char* parse_client_request(const char* request, int size) {
     char* find_GET = strnstr(request, GET_ROOT, size);
     if (find_GET != NULL) {
         puts("I found Get!");
+    // get time 
+        // time_t the_time = time(NULL);
+        // printf("Current UNIX TIME %ld", the_time);
+        time_t time_raw_format;
+        struct tm * ptr_time;
+
+        time ( &time_raw_format );
+        ptr_time = localtime ( &time_raw_format );
+        printf ("Current local date and time: %s", asctime(ptr_time));
+    
         return GET_RESPONSE_HEAD;
     }
 
