@@ -4,4 +4,4 @@ server:
 	$(CC) server.c -o server
 
 clean:
-	rm server
+	rm -f server
