@@ -23,7 +23,7 @@
 
 #define GET_ROOT "GET / HTTP/1.1"
 #define ROOT_INDEX_HTTP_HTML "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>"
-#define ROOT_INFO "{\"info\": {\"name\":\":::student name:::\", \"url_request\": \"/info\", \"last_message\": \":::undefined::: OR :::POST message:::\"}}"
+#define ROOT_INFO "HTTP/1.1 200 OK\n\n{\"info\": {\"name\":\"Jake, Antonio & Patrick\", \"url_request\": \"/info\", \"last_message\": \":::undefined::: OR :::POST message:::\"}}"
 #define GET_INFO "GET /info HTTP/1.1"
 #define POST_INFO "POST /info HTTP/1.1"
 #define DATE "Date:"
@@ -202,8 +202,14 @@ int main(void)
         if (send(new_fd, ROOT_INFO, strlen(ROOT_INFO), 0) == -1)
           perror("send");
         break;
+      // case 3:
+      //   if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>The PUT msg</body></html>", 69, 0) == -1)
+      //     perror("send");
+      //   break;
       case 3:
-        if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
+        // check buffer for /r/n/r/n and grab string after that
+
+        if (send(new_fd, buffer, strlen(buffer), 0) == -1)
           perror("send");
         break;
       // case 4:
