@@ -14,6 +14,7 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include "request_parser.h"
 
 #define PORT "7080"  // the port users will be connecting to
 
@@ -134,30 +135,13 @@ int main(void)
       // LS: read from client input
       const int READ_BUFFER_SIZE = 1024;
       char buffer[READ_BUFFER_SIZE];
-      int read_result = read(new_fd, &buffer, READ_BUFFER_SIZE);
-      printf("read_result: %d\n", read_result);
-      printf("buffer: %s\n", buffer);
+      int read_result_size = read(new_fd, &buffer, READ_BUFFER_SIZE);
+      char* response = parse_client_request(buffer, read_result_size);
 
-      // LS: loop above until \n\n is sent, signaling the end of an HTTP request
-
-      int option;
-
-      char search[5] = {'P', 'O', 'S', 'T', '\0'};
-      if (strstr(buffer, search)) {
-        option = 1;
-        printf("\nFound\n");
-      }
-
-      char ssearch[5] = {'G', 'E', 'T', '\0'};
-      if (strstr(buffer, ssearch)) {
-        option = 2;
-        printf("\nFound\n");
-      }
-      // LS: parse the input and determine what result to send
       close(sockfd); // child doesn't need the listener
       // LS: Send the correct response in JSON format
-      if (send(new_fd, "HTTP/1.0 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
-      // if (send(new_fd, "Hello, world!", 13, 0) == -1)
+      // if (send(new_fd, "HTTP/1.0 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
+      if (send(new_fd, "Hello, world!", 13, 0) == -1)
         perror("send");
         close(new_fd);
         exit(0);
