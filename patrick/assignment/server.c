@@ -24,6 +24,7 @@
 #define GET_ROOT "GET / HTTP/1.1"
 #define ROOT_INDEX_HTTP_HTML "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>"
 #define ROOT_INFO "HTTP/1.1 200 OK\n\n{\"info\": {\"name\":\"Jake, Antonio & Patrick\", \"url_request\": \"/info\", \"last_message\": \":::undefined::: OR :::POST message:::\"}}"
+#define POST_INFO_HEADER "HTTP/1.1 200 OK\n\n"
 #define GET_INFO "GET /info HTTP/1.1"
 #define POST_INFO "POST /info HTTP/1.1"
 #define DATE "Date:"
@@ -193,6 +194,11 @@ int main(void)
       close(sockfd); // child doesn't need the listener
 
       // if option = 1; or SWITCH
+      char postman[1024] = {'H', 'T', 'T', 'P', '/', '1', '.', '1', ' ', '2', '0', '0', ' ', 'O', 'K', '\n', '\n', '\0'};
+      // printf("Wait a minute Mr. Postman: %s", postman);
+      // printf("the buff'n'wax: %s", buffer);
+      // strcat(postman, buffer);
+      // printf("stir Kitten? %s", postman);
       switch(option) {
       case 1:
         if (send(new_fd, ROOT_INDEX_HTTP_HTML, strlen(ROOT_INDEX_HTTP_HTML), 0) == -1)
@@ -208,17 +214,16 @@ int main(void)
       //   break;
       case 3:
         // check buffer for /r/n/r/n and grab string after that
-
-        if (send(new_fd, buffer, strlen(buffer), 0) == -1)
+        if (send(new_fd, postman, strlen(postman), 0) == -1)
           perror("send");
+        printf("What's in the buffer: %s\n", buffer);
         break;
       // case 4:
       //   if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
       //     perror("send");
       //   break;
       // case 5:
-      //   if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
-      //     perror("send");
+      //   send binary data
       //   break;
       default:
         break;
