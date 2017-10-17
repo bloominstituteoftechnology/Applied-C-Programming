@@ -21,14 +21,13 @@ char* parse_client_request(const char* request, int size) {
     if (find_GET != NULL) {
         puts("I found Get!");
     // get time 
-        // time_t the_time = time(NULL);
-        // printf("Current UNIX TIME %ld", the_time);
-        time_t time_raw_format;
+        time_t the_time = time(NULL);
+        printf("Current UNIX TIME %ld", the_time);
         struct tm * ptr_time;
 
-        time ( &time_raw_format );
-        ptr_time = localtime ( &time_raw_format );
-        printf ("Current local date and time: %s", asctime(ptr_time));
+        time ( &the_time );
+        ptr_time = localtime ( &the_time );
+        printf ("\nCurrent local date and time: %s", asctime(ptr_time));
     
         return GET_RESPONSE_HEAD;
     }
