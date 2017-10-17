@@ -9,3 +9,4 @@
 # Ignore bb gcc files
 a.out
 *.gch
+server
