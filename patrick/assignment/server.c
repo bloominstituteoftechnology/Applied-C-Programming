@@ -16,15 +16,14 @@
 #include <sys/wait.h>   // defines symbolic constants for use with waitpid(): http://pubs.opengroup.org/onlinepubs/7908799/xsh/syswait.h.html
 #include <signal.h>     // signal handling functions, expanded types: http://pubs.opengroup.org/onlinepubs/7908799/xsh/signal.h.html
 
-// #include "index.html" // HTML stuff?
+/******************************************************************************
+ * #include "index.html" or read in HTML stuff for GET / ?
+ ******************************************************************************/
 
 /* Macros */
 #define PORT "7080"  // the port users will be connecting to
 
 #define GET_ROOT "GET / HTTP/1.1"
-#define ROOT_INDEX_HTTP_HTML "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>"
-#define ROOT_INFO "HTTP/1.1 200 OK\n\n{\"info\": {\"name\":\"Jake, Antonio & Patrick\", \"url_request\": \"/info\", \"last_message\": \":::undefined::: OR :::POST message:::\"}}"
-#define POST_INFO_HEADER "HTTP/1.1 200 OK\n\n"
 #define GET_INFO "GET /info HTTP/1.1"
 #define POST_INFO "POST /info HTTP/1.1"
 #define DATE "Date:"
@@ -35,10 +34,19 @@
 
 #define BACKLOG 10   // how many pending connections queue will hold
 
-/* https://www.gnu.org/software/libc/manual/html_node/Process-Completion.html
- * WNOHANG - This flag specifies that waitpid should return immediately instead of waiting, if there is no child process ready to be noticed.
+/******************************************************************************
+ * Macros for convenient string variables
+ ******************************************************************************/
+#define GET_ROOT_INDEX "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>"
+#define GET_ROOT_INFO "HTTP/1.1 200 OK\n\n{\"info\": {\"name\":\"Jake, Antonio & Patrick\", \"url_request\": \"/info\", \"last_message\": \":::undefined::: OR :::POST message:::\"}}"
+#define POST_INFO_HEADER "HTTP/1.1 200 OK\n\n"
+
+/******************************************************************************
+ * https://www.gnu.org/software/libc/manual/html_node/Process-Completion.html
+ * WNOHANG - This flag specifies that waitpid should return immediately instead
+ * of waiting, if there is no child process ready to be noticed.
  * deals with signals from child processes?
- */
+ ******************************************************************************/
 void sigchld_handler(int s)
 {
   // waitpid() might overwrite errno, so we save and restore it:
@@ -49,8 +57,10 @@ void sigchld_handler(int s)
   errno = saved_errno;
 }
 
-// I'm happy with this explanation, discerns IPv4 and 6
-// get sockaddr, IPv4 or IPv6:
+/******************************************************************************
+ * I'm happy with this explanation, discerning IPv4 and 6
+ * get sockaddr, IPv4 or IPv6:
+ ******************************************************************************/
 void *get_in_addr(struct sockaddr *sa)
 {
   if (sa->sa_family == AF_INET) {
@@ -60,12 +70,13 @@ void *get_in_addr(struct sockaddr *sa)
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-
-/* Whoa. As I understand, the code prior to the while loop
- * is setting up the server components
+/******************************************************************************
+ * Whoa. There's a lot going on in main()
+ * As I understand it , all the code prior to the while loop
+ * is responsible for setting up the server components
  * and once the while loop engages, that's where the server is listening
- */
-
+ * for a connection and ready to send data to the client
+ ******************************************************************************/
 int main(void)
 {
   int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
@@ -132,6 +143,9 @@ int main(void)
 
   printf("server: waiting for connections...\n");
 
+/******************************************************************************
+ * This is where the magic happens!
+ ******************************************************************************/
   while(1) {  // main accept() loop
     sin_size = sizeof their_addr;
     new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
@@ -154,85 +168,66 @@ int main(void)
       printf("buffer: %s\n", buffer);
 
       // LS: loop above until \n\n is sent, signaling the end of an HTTP request
-      /* substring - looks for a string within a string
-        or char8 within a char*
-        split a string
-        HTTP protocol
-        deserialize the string from and putting it in a serial fomat
-        based on what is sent in, determine the kind of response (GET, POST /info, GET /info)
-        "split" baed on \n
+      // LS: parse the input and determine what result to send
 
-        measure the data, parse it out, to discern /GET or /info GET or POST
-        https://linux.die.net/man/3/strstr
-      */
+/******************************************************************************
+ * DISCERNING THE KIND OF REQUEST BASED ON THE HEADER INFORMATION
+ * IN THE BUFFER - A STRING.
+ *****************************************************************************/
       int option;
-      /* GET */
+
+      /* DISCENRING GET REQUESTS*/
       if (strstr(buffer, GET_INFO)) {
         option = 2;
         puts("Found GET /info\n");
       } else if (strstr(buffer, GET_ROOT)) {
         option = 1;
         puts("Found GET /\n");
+        // ONCE CHROME RECIEVES AN HTTP TRANSMISSION, IT WILL ASK FOR
+        // A favicon.ico FILE - BINARY DATA
+        // TODO: SEND BINARY DATA STREAM
       } else if (strstr(buffer, "GET /favicon.ico HTTP/1.1")) {
         puts("wOt?!?!");
-        option = 5;
+        option = 4;
       }
 
-      /* POST */
-      // char searchPOST[5] = {'P', 'O', 'S', 'T', '\0'};
-      // if (strstr(buffer, searchPOST)) {
-      //   option = 3;
-      //   puts("Found POST /, what about posting to /info???\n");
-      // } else
-
+      /* DISCERNING POST REQUESTS */
       if (strstr(buffer, POST_INFO)) {
         option = 3;
         puts("Found POST /info\n");
       }
 
-      // LS: parse the input and determine what result to send
       close(sockfd); // child doesn't need the listener
 
-      // if option = 1; or SWITCH
-      char postmanHEADER[1024] = {'H', 'T', 'T', 'P', '/', '1', '.', '1', ' ', '2', '0', '0', ' ', 'O', 'K', '\n', '\n', '\0'};
+      /* HEADER STRING FOR POST REQUEST RETURN */
+      char postReturnHEADER[1024] = {'H', 'T', 'T', 'P', '/', '1', '.', '1', ' ', '2', '0', '0', ' ', 'O', 'K', '\n', '\n', '\0'};
       // TODO: ^^^^^^ ACTUALLY PARSE OUT BODY AND SEND IT OR WRITE IT TO A FILE; MAYBE JUST SEND A CONFIRMATION OF RECEIPT?
-      // printf("Wait a minute Mr. Postman: %s", postmanHEADER);
+      // printf("Wait a minute Mr. Postman: %s", postReturnHEADER);
       // printf("the buff'n'wax: %s", buffer);
-      // strcat(postmanHEADER, buffer);
-      // printf("stir Kitten? %s", postmanHEADER);
+      // strcat(postReturnHEADER, buffer);
+      // printf("stir Kitten? %s", postReturnHEADER);
       switch(option) {
       case 1:
-        if (send(new_fd, ROOT_INDEX_HTTP_HTML, strlen(ROOT_INDEX_HTTP_HTML), 0) == -1)
+        if (send(new_fd, GET_ROOT_INDEX, strlen(GET_ROOT_INDEX), 0) == -1)
           perror("send");
         break;
+      // LS: Send the correct response in JSON format
       case 2:
-        if (send(new_fd, ROOT_INFO, strlen(ROOT_INFO), 0) == -1)
+        if (send(new_fd, GET_ROOT_INFO, strlen(GET_ROOT_INFO), 0) == -1)
           perror("send");
         break;
-      // case 3:
-      //   if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>The PUT msg</body></html>", 69, 0) == -1)
-      //     perror("send");
-      //   break;
       case 3:
-        // check buffer for /r/n/r/n and grab string after that
-        if (send(new_fd, postmanHEADER, strlen(postmanHEADER), 0) == -1)
+        if (send(new_fd, postReturnHEADER, strlen(postReturnHEADER), 0) == -1)
           perror("send");
         printf("What's in the buffer: %s\n", buffer);
         break;
       // case 4:
-      //   if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
-      //     perror("send");
-      //   break;
-      // case 5:
-      //   send binary data
+      //   /* SEND BINARY DATA STREAM &/
       //   break;
       default:
         break;
       }
-      // LS: Send the correct response in JSON format
-      // if (send(new_fd, "Hello, world!", 13, 0) == -1)
-      // if (send(new_fd, "HTTP/1.1 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
-      //   perror("send");
+
       close(new_fd);
       exit(0);
     }
