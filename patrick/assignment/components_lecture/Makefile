@@ -1,7 +1,7 @@
 CC=gcc
 
 server: clean
-	$(CC) server.c -o server
+	$(CC) server.c request_parser.c -o server
 
 clean:
 	rm -f server
