@@ -5,13 +5,19 @@
 #define GET_ROOT "GET / HTTP/1.1"
 #define GET_INFO "GET /info HTTP/1.1"
 #define POST_INFO "POST /info HTTP/1.1"
-#define GET_RESPONSE_BODY "<html><head></head><body>Welcome to Jake, Antonio Patrick's AWESOME Page</body></html>"
-#define GET_INFO_BODY "{\"info\": {\"name\":\"Jake, Antonio & Patrick\", \"url_request\": \"/info\", \"last_message\": \":::undefined::: OR :::POST message:::\"}}"
 #define GET_RESPONSE_TAIL "\r\n\r\n"
 #define HEADER_BODY_SEPARATOR "\n\n"
 #define HTTP_HEADER "HTTP/1.1 200 OK"
+
+#define GET_RESPONSE_BODY "<html><head></head><body>Welcome to Jake, Antonio Patrick's AWESOME Page</body></html>"
 #define GET_RESPONSE HTTP_HEADER HEADER_BODY_SEPARATOR GET_RESPONSE_BODY
+
+#define GET_INFO_BODY "{\"info\": {\"name\":\"Jake, Antonio & Patrick\", \"url_request\": \"/info\", \"last_message\": \":::undefined::: OR :::POST message:::\"}}"
 #define GET_INFO_RESPONSE HTTP_HEADER HEADER_BODY_SEPARATOR GET_INFO_BODY
+
+#define POST_INFO_BODY "Thanks for posting that!"
+#define POST_INFO_RESPONSE HTTP_HEADER HEADER_BODY_SEPARATOR POST_INFO_BODY
+
 #define NOT_FOUND_HEADER "HTTP/1.1 404 Not Found"
 #define NOT_FOUND_BODY "That route isn't supported!!!"
 #define NOT_FOUND NOT_FOUND_HEADER HEADER_BODY_SEPARATOR NOT_FOUND_BODY
@@ -101,7 +107,7 @@ char* parse_client_request(const char* request, int size) {
         ptr_time = localtime(&the_time);
         printf ("Current local date and time: %s\n", asctime(ptr_time));
 
-        return HTTP_HEADER;
+        return POST_INFO_RESPONSE;
     }
 
     return NOT_FOUND;
