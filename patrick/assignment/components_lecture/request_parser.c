@@ -2,9 +2,9 @@
 #include <string.h>
 #include <time.h>
 
-#define GET_ROOT "GET / H"
-#define GET_INFO "GET /info"
-#define POST_INFO "POST /info"
+#define GET_ROOT "GET / HTTP/1.1"
+#define GET_INFO "GET /info HTTP/1.1"
+#define POST_INFO "POST /info HTTP/1.1"
 #define GET_RESPONSE_HEAD "<html><head></head><body>Welcome to Patrick's AWESOME Page</body></html>"
 #define GET_RESPONSE_TAIL "\r\n\r\n"
 
@@ -20,8 +20,6 @@ char* parse_client_request(const char* request, int size) {
     printf("Client opened socket and sent: \n\n%s\n", request);
     // int double_newline = memchr(buffer, "\n", 1024);
     // printf("read_result: %d\n", double_newline);
-
-// LS: loop above until \n\n is sent, signaling the end of an HTTP request
 
 // LS: parse the input and determine what result to send
 
