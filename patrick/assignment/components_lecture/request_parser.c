@@ -12,6 +12,9 @@
 #define HTTP_HEADER "HTTP/1.1 200 OK"
 #define GET_RESPONSE HTTP_HEADER HEADER_BODY_SEPARATOR GET_RESPONSE_BODY
 #define GET_INFO_RESPONSE HTTP_HEADER HEADER_BODY_SEPARATOR GET_INFO_BODY
+#define NOT_FOUND_HEADER "HTTP/1.1 404 Not Found"
+#define NOT_FOUND_BODY "That route isn't supported!!!"
+#define NOT_FOUND NOT_FOUND_HEADER HEADER_BODY_SEPARATOR NOT_FOUND_BODY
 
 /******************************************************************************
  * parse_client_request takes a single HTTP request as a STRING
@@ -74,6 +77,9 @@ char* parse_client_request(const char* request, int size) {
         time(&the_time);
         ptr_time = localtime(&the_time);
         printf ("Current local date and time: %s\n", asctime(ptr_time));
+
+        // TODO: SPECIFY JSON CONTENT TYPE
+
         return GET_INFO_RESPONSE;
     }
 /******************************************************************************
@@ -94,7 +100,9 @@ char* parse_client_request(const char* request, int size) {
         time(&the_time);
         ptr_time = localtime(&the_time);
         printf ("Current local date and time: %s\n", asctime(ptr_time));
+
+        return HTTP_HEADER;
     }
 
-    return " "; // <~~~~ Risky Business
+    return NOT_FOUND;
 }
