@@ -145,10 +145,11 @@ int main(void)
       close(sockfd); // child doesn't need the listener
       // LS: Send the correct response in JSON format
       // if (send(new_fd, "HTTP/1.0 200 OK\n\n<html><head></head><body>Hello World!</body></html>", 69, 0) == -1)
-      if (send(new_fd, "Hello, world!", 13, 0) == -1)
+      // if (send(new_fd, "Hello, world!", 13, 0) == -1)
+      if (send(new_fd, response, strlen(response), 0)  == -1)
         perror("send");
-        close(new_fd);
-        exit(0);
+      close(new_fd);
+      exit(0);
     }
     close(new_fd);  // parent doesn't need this
   }
