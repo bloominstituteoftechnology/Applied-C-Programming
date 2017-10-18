@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #define GET_ROOT "GET / H"
 #define GET_INFO "GET /info"
@@ -18,6 +19,8 @@ char* parse_client_request(const char* request, int size) {
     char* find_GET = strnstr(request, GET_ROOT, size);
     if (find_GET != NULL) {
         puts("I found GET!");
+        time_t the_time = time(NULL);
+        printf("The current UNIX time: %ld", the_time);
         return GET_RESPONSE_HEAD;
     }
 
