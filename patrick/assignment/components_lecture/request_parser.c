@@ -5,8 +5,13 @@
 #define GET_ROOT "GET / HTTP/1.1"
 #define GET_INFO "GET /info HTTP/1.1"
 #define POST_INFO "POST /info HTTP/1.1"
-#define GET_RESPONSE_HEAD "<html><head></head><body>Welcome to Patrick's AWESOME Page</body></html>"
+#define GET_RESPONSE_BODY "<html><head></head><body>Welcome to Patrick's AWESOME Page</body></html>"
+#define GET_INFO_BODY "{\"info\": {\"name\":\"Jake, Antonio & Patrick\", \"url_request\": \"/info\", \"last_message\": \":::undefined::: OR :::POST message:::\"}}"
 #define GET_RESPONSE_TAIL "\r\n\r\n"
+#define HEADER_BODY_SEPARATOR "\n\n"
+#define HTTP_HEADER "HTTP/1.1 200 OK"
+#define GET_RESPONSE HTTP_HEADER HEADER_BODY_SEPARATOR GET_RESPONSE_BODY
+#define GET_INFO_RESPONSE HTTP_HEADER HEADER_BODY_SEPARATOR GET_INFO_BODY
 
 /******************************************************************************
  * parse_client_request takes a single HTTP request as a STRING
@@ -25,7 +30,7 @@ char* parse_client_request(const char* request, int size) {
 
 /******************************************************************************
  * HEADER INFO TO SEND:
- * HTTP/1.1 200 OK
+ * HTTP/1.1 200 OK                              <~~~ bare minimum header
  * Date: xxxx (formatted time or Unix time)
  * Server: Name of Student
  * Content-Length: yy                           <~~~ Pointer Arithmetic!!!!!
@@ -47,7 +52,7 @@ char* parse_client_request(const char* request, int size) {
         ptr_time = localtime(&the_time);
         printf ("Current local date and time: %s\n", asctime(ptr_time));
 
-        return GET_RESPONSE_HEAD;
+        return GET_RESPONSE;
     }
 /******************************************************************************
  * BODY DATA TO SEND:
@@ -60,6 +65,8 @@ char* parse_client_request(const char* request, int size) {
     char* find_GET_info = strnstr(request, GET_INFO, size);
     if (find_GET_info != NULL) {
         puts("I found GET /info!");
+
+        return GET_INFO_RESPONSE;
     }
 /******************************************************************************
  * BODY DATA TO SEND:
