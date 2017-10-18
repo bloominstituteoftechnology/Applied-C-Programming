@@ -45,7 +45,7 @@ char* parse_client_request(const char* request, int size) {
         struct tm * ptr_time;
         time(&the_time);
         ptr_time = localtime(&the_time);
-        printf ("Current local date and time: %s <~~~ COOL BEANS!!!\n", asctime(ptr_time));
+        printf ("Current local date and time: %s\n", asctime(ptr_time));
 
         return GET_RESPONSE_HEAD;
     }
