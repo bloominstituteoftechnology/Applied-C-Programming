@@ -5,7 +5,7 @@
 #define GET_ROOT "GET / HTTP/1.1"
 #define GET_INFO "GET /info HTTP/1.1"
 #define POST_INFO "POST /info HTTP/1.1"
-#define GET_RESPONSE_BODY "<html><head></head><body>Welcome to Patrick's AWESOME Page</body></html>"
+#define GET_RESPONSE_BODY "<html><head></head><body>Welcome to Jake, Antonio Patrick's AWESOME Page</body></html>"
 #define GET_INFO_BODY "{\"info\": {\"name\":\"Jake, Antonio & Patrick\", \"url_request\": \"/info\", \"last_message\": \":::undefined::: OR :::POST message:::\"}}"
 #define GET_RESPONSE_TAIL "\r\n\r\n"
 #define HEADER_BODY_SEPARATOR "\n\n"
@@ -18,6 +18,8 @@
  * and PROCESSES it.
  * NOTE: The 'request' char* could contain binary data, which we
  * are not handling. If it did get binary data, it would crash (or worse).
+ * TODO: handle Chrome request for /favicon.ico BINARY data
+ * TODO: refactor time() into a helper function? Possibly a time.c and time.h file?
  ******************************************************************************/
 
 char* parse_client_request(const char* request, int size) {
@@ -65,7 +67,13 @@ char* parse_client_request(const char* request, int size) {
     char* find_GET_info = strnstr(request, GET_INFO, size);
     if (find_GET_info != NULL) {
         puts("I found GET /info!");
-
+        /* UNIX TIME AND LOCAL TIME */
+        time_t the_time = time(NULL);
+        printf("The current UNIX time: %ld\n", the_time);
+        struct tm * ptr_time;
+        time(&the_time);
+        ptr_time = localtime(&the_time);
+        printf ("Current local date and time: %s\n", asctime(ptr_time));
         return GET_INFO_RESPONSE;
     }
 /******************************************************************************
@@ -79,6 +87,13 @@ char* parse_client_request(const char* request, int size) {
     char* find_POST = strnstr(request, POST_INFO, size);
     if (find_POST != NULL) {
         puts("I found POST /info!");
+        /* UNIX TIME AND LOCAL TIME */
+        time_t the_time = time(NULL);
+        printf("The current UNIX time: %ld\n", the_time);
+        struct tm * ptr_time;
+        time(&the_time);
+        ptr_time = localtime(&the_time);
+        printf ("Current local date and time: %s\n", asctime(ptr_time));
     }
 
     return " "; // <~~~~ Risky Business
