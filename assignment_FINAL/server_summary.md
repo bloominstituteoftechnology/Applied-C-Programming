@@ -1,0 +1,5 @@
+# Applied C Programming
+
+The server.c program configures an active and persistent server socket available for HTTP1.1 GET and POST request methods. The server launches a child process with each unique request, discerns the type of request and responds by sending data to the client apropos of the request. Once the return data is sent, the child process is closed and the server remains awaiting further socket connections.
+
+Currently we have not implemented a client return from a POST request other than the header information. Also, we are not handling cases other than GET requests to the root index and /info route, and the one POST request to /info. We noticed that once Chrome has received the bare minimum for a viable web page, it will also request a favico.icon. To accomodate this request would require sending binary data. That would be fun to do. Lastly, In addition to sending all the appropriate headers (time stamp, content-type, etc) we would also like to create a log file which the POST data is written to.
