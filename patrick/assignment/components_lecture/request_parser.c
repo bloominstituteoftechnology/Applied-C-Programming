@@ -24,7 +24,7 @@ char* parse_client_request(const char* request, int size) {
 // LS: parse the input and determine what result to send
 
 /******************************************************************************
- * HEADER DATA TO SEND:
+ * HEADER INFO TO SEND:
  * HTTP/1.1 200 OK
  * Date: xxxx (formatted time or Unix time)
  * Server: Name of Student
@@ -34,7 +34,7 @@ char* parse_client_request(const char* request, int size) {
  ******************************************************************************/
 
 
-// 1: must handle GET/
+// 1: must handle GET /
 // look for 'GET/' inside request
     char* find_GET = strnstr(request, GET_ROOT, size);
     if (find_GET != NULL) {
@@ -43,15 +43,26 @@ char* parse_client_request(const char* request, int size) {
         printf("The current UNIX time: %ld", the_time);
         return GET_RESPONSE_HEAD;
     }
+/******************************************************************************
+ * BODY DATA TO SEND:
+ * Content-Type: text/html
+ * <html><head></head><body>Welcome to :::students' names:::</body></html>
+ ******************************************************************************/
 
-// 2: must handle GET/info
+// 2: must handle GET /info
 // look for 'GET/info' inside request
     char* find_GET_info = strnstr(request, GET_INFO, size);
     if (find_GET_info != NULL) {
         puts("I found GET /info!");
     }
+/******************************************************************************
+ * BODY DATA TO SEND:
+ * Content-Type: application/json
+ * {"info": {"name":":::student name:::", "url_request": "/info", "last_message": ":::undefined::: OR :::POST message:::"}}
+ ******************************************************************************/
 
-// 3: must handle POST/info
+
+// 3: must handle POST /info
     char* find_POST = strnstr(request, POST_INFO, size);
     if (find_POST != NULL) {
         puts("I found POST /info!");
