@@ -1,6 +1,6 @@
 CC=gcc
 
-server:
+server: clean
 	$(CC) server.c -o server
 
 clean:
