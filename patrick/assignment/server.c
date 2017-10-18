@@ -194,11 +194,12 @@ int main(void)
       close(sockfd); // child doesn't need the listener
 
       // if option = 1; or SWITCH
-      char postman[1024] = {'H', 'T', 'T', 'P', '/', '1', '.', '1', ' ', '2', '0', '0', ' ', 'O', 'K', '\n', '\n', '\0'};
-      // printf("Wait a minute Mr. Postman: %s", postman);
+      char postmanHEADER[1024] = {'H', 'T', 'T', 'P', '/', '1', '.', '1', ' ', '2', '0', '0', ' ', 'O', 'K', '\n', '\n', '\0'};
+      // TODO: ^^^^^^ ACTUALLY PARSE OUT BODY AND SEND IT OR WRITE IT TO A FILE; MAYBE JUST SEND A CONFIRMATION OF RECEIPT?
+      // printf("Wait a minute Mr. Postman: %s", postmanHEADER);
       // printf("the buff'n'wax: %s", buffer);
-      // strcat(postman, buffer);
-      // printf("stir Kitten? %s", postman);
+      // strcat(postmanHEADER, buffer);
+      // printf("stir Kitten? %s", postmanHEADER);
       switch(option) {
       case 1:
         if (send(new_fd, ROOT_INDEX_HTTP_HTML, strlen(ROOT_INDEX_HTTP_HTML), 0) == -1)
@@ -214,7 +215,7 @@ int main(void)
       //   break;
       case 3:
         // check buffer for /r/n/r/n and grab string after that
-        if (send(new_fd, postman, strlen(postman), 0) == -1)
+        if (send(new_fd, postmanHEADER, strlen(postmanHEADER), 0) == -1)
           perror("send");
         printf("What's in the buffer: %s\n", buffer);
         break;
