@@ -23,6 +23,17 @@ char* parse_client_request(const char* request, int size) {
 
 // LS: parse the input and determine what result to send
 
+/******************************************************************************
+ * HEADER DATA TO SEND:
+ * HTTP/1.1 200 OK
+ * Date: xxxx (formatted time or Unix time)
+ * Server: Name of Student
+ * Content-Length: yy                           <~~~ Pointer Arithmetic!!!!!
+ * Connection: close
+ * Content-Type: text/html                      <~~~ GET / vs GET /info (JSON)
+ ******************************************************************************/
+
+
 // 1: must handle GET/
 // look for 'GET/' inside request
     char* find_GET = strnstr(request, GET_ROOT, size);
