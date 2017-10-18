@@ -39,8 +39,14 @@ char* parse_client_request(const char* request, int size) {
     char* find_GET = strnstr(request, GET_ROOT, size);
     if (find_GET != NULL) {
         puts("I found GET!");
+        /* UNIX TIME AND LOCAL TIME */
         time_t the_time = time(NULL);
-        printf("The current UNIX time: %ld", the_time);
+        printf("The current UNIX time: %ld\n", the_time);
+        struct tm * ptr_time;
+        time(&the_time);
+        ptr_time = localtime(&the_time);
+        printf ("Current local date and time: %s <~~~ COOL BEANS!!!\n", asctime(ptr_time));
+
         return GET_RESPONSE_HEAD;
     }
 /******************************************************************************
