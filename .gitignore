@@ -5,3 +5,8 @@
 
 # Ignore macOS
 .DS_Store
+
+# Ignore bb gcc files
+a.out
+*.gch
+server
