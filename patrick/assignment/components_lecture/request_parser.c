@@ -68,5 +68,5 @@ char* parse_client_request(const char* request, int size) {
         puts("I found POST /info!");
     }
 
-    return " ";
+    return " "; // <~~~~ Risky Business
 }
