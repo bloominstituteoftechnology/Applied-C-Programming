@@ -136,7 +136,10 @@ int main(void)
       const int READ_BUFFER_SIZE = 1024;
       char buffer[READ_BUFFER_SIZE];
       int read_result_size = read(new_fd, &buffer, READ_BUFFER_SIZE);
-      // Per request_parser.c & .h
+
+      /************************************************************************
+       * Per request_parser.c & .h
+       ************************************************************************/
       char* response = parse_client_request(buffer, read_result_size);
 
       close(sockfd); // child doesn't need the listener
