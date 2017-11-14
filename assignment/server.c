@@ -76,7 +76,6 @@ void *get_in_addr(struct sockaddr *sa)
   if (sa->sa_family == AF_INET) {
     return &(((struct sockaddr_in*)sa)->sin_addr);
   }
-
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
@@ -181,38 +180,33 @@ int main(void)
       printf("%s\n", buffer);
       token = strtok(buffer, s);
       request = token;
+
       while( token != NULL ) {
       if (strstr(token, "User-Agent")) userAgent = token;
       if (strstr(token, CONTENT_LENGTH)) contentLength = token;
       if (strstr(token, "Host")) host = token;
       data = token;
       token = strtok(NULL, s);
-   }
+      }
     
-    
-    if (memcmp(request, GET_ROOT, 14) == 0) strcpy(content, "<html><head></head><body>Welcome to :::student name:::</body></html>");
-    if (memcmp(request, GET_INFO, strlen(GET_INFO)) == 0) {
-      read_lock(&message);
-      strcpy(content, "{\"info\": {\"name\": \"");
-      strcat(content, studentName);
-      strcat(content, "\", \"url_request\": \"/info\", \"last_message\": \"");
-      strcat(content, message);
-      strcat(content, "\"}}");
-    }
-    
-    if (memcmp(request, POST_INFO, 14) == 0) write_lock(&data), strcpy(content, "Info has been posted");
+      if (memcmp(request, GET_ROOT, 14) == 0) strcpy(content, "<html><head></head><body>Welcome to :::student name:::</body></html>");
+      if (memcmp(request, GET_INFO, strlen(GET_INFO)) == 0) {
+        read_lock(&message);
+        strcpy(content, "{\"info\": {\"name\": \"");
+        strcat(content, studentName);
+        strcat(content, "\", \"url_request\": \"/info\", \"last_message\": \"");
+        strcat(content, message);
+        strcat(content, "\"}}");
+      }
+      if (memcmp(request, POST_INFO, 14) == 0) write_lock(&data), strcpy(content, "Info has been posted");
 
-    
+      time_t t = time(0);
+      char* date = ctime(&t);
 
-    time_t t = time(0);
-    char* date = ctime(&t);
-
-    sprintf(response, "HTTP/1.1 200 OK\n%s %s%s %s\n%s %lu\n%s\n%s\n\n%s\n", 
-     DATE, date, SERVER, studentName, CONTENT_LENGTH, strlen(content), CONNECTION, CONTENT_TYPE, content);
-    printf("%s", response);
-
+      sprintf(response, "HTTP/1.1 200 OK\n%s %s%s %s\n%s %lu\n%s\n%s\n\n%s\n", 
+        DATE, date, SERVER, studentName, CONTENT_LENGTH, strlen(content), CONNECTION, CONTENT_TYPE, content);
+      printf("%s", response);
       // LS: loop above until \n\n is sent, signaling the end of an HTTP request
-
       // LS: parse the input and determine what result to send
       close(sockfd); // child doesn't need the listener
       // LS: Send the correct response in JSON format
@@ -223,6 +217,5 @@ int main(void)
     }
     close(new_fd);  // parent doesn't need this
   }
-
   return 0;
 }
