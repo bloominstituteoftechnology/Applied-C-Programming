@@ -1,4 +1,4 @@
-CC=gcc
+CC=gcc -Wall -Wextra
 
 all: fork1 sigusr sigint pipe1 pipe2 pipe3 speak tick lockdemo kirk spock semrm semdemo shmdemo mmapdemo echos echoc spair bits showip read_from_stdin pointer_crazy
 .PHONY : all
