@@ -197,6 +197,7 @@ int main(void)
         strcat(content, "\", \"url_request\": \"/info\", \"last_message\": \"");
         strcat(content, message);
         strcat(content, "\"}}");
+        free(message);
       }
       if (memcmp(request, POST_INFO, 14) == 0) write_lock(&data), strcpy(content, "Info has been posted");
 
