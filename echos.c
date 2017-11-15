@@ -5,12 +5,14 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <unistd.h>
 
 #define SOCK_PATH "echo_socket"
 
 int main(void)
 {
-    int s, s2, t, len;
+    int s, s2, len;
+    socklen_t t;
     struct sockaddr_un local, remote;
     char str[100];
 

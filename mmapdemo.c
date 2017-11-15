@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
     offset = atoi(argv[1]);
     if (offset < 0 || offset > sbuf.st_size-1) {
-        fprintf(stderr, "mmapdemo: offset must be in the range 0-%d\n", sbuf.st_size-1);
+        fprintf(stderr, "mmapdemo: offset must be in the range 0-%lld\n", sbuf.st_size-1);
         exit(1);
     }
     
